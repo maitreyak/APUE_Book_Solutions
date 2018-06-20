@@ -84,3 +84,38 @@ vagrant@precise64:/vagrant/advC$ cat output_file
 SUCCESS
 ```
 During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/{pid}/fd directory. Or just use the lsod -p <pid> command to see all open files (& file descrioptors).
+
+# 3.6 
+# If you open a file for read–write with the append flag, can you still read from anywhere in the file using lseek? Can you use lseek to replace existing data in the file? Write a program to verify this.
+Program demonstrates the solution. See answers in the comments. 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <error.h>
+
+int
+main(int argc, char *argv[]) {
+    if(argc <2) {
+        printf("Need valid file arg");
+        exit(-1);
+    }
+    int fd;
+    if((fd = open(argv[1], O_RDWR|O_APPEND)) == -1 ){
+        perror("opening file erro");
+        exit(-1);
+    }
+    int current_pos;
+    char buf[9];
+    if((current_pos = lseek(fd,0,SEEK_SET)) == -1){
+        perror("Error seeking");
+    }
+    read(fd, buf, 8);
+    //lseek is set to a cursor location (0 in this case) can read from any line.
+    printf("current postion is %d but the sting read is %s\n", current_pos, buf);
+    //writes however are only done at the EOF due to the O_APPEND flags.
+    write(fd,"endoffile\n",10);
+    return 0;
+}
+```
