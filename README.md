@@ -134,6 +134,85 @@ lrwx------ 1 vagrant vagrant 64 Jun 20 20:57 2 -> /dev/pts/0
 ```
 As you can see, "standard error" is outoutted on the console as its file descriptor is still pointing to /dev/pts/0. Standard out has been redirected into file output2.
 
+Now that we understand what the command do, we can focus on why the two commands work the way that they do.
+We could emulate the what the shell does using dup2 function calls (or fcntl).
+```
+Emulating : ./a.out > outfile 2>&1
+```
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int
+main(void){
+    int close_this_fd;
+    dup2(close_this_fd = open("output", O_WRONLY), 1);
+    dup2(1,2);
+    close(close_this_fd);
+    fprintf(stdout, "standard output\n");
+    fprintf(stderr, "standard error\n");
+    fflush(stdout);
+    sleep(100);
+    return;
+}	
+```
+Now examine the /proc/{pid}/fd
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+^Z
+[2]+  Stopped                 ./a.out
+vagrant@precise64:/vagrant/advC$ cat output
+standard error
+standard output
+vagrant@precise64:/vagrant/advC$ ps -ef | grep a.out
+vagrant   2761  1586  0 22:07 pts/0    00:00:00 ./a.out
+vagrant   2769  1586  0 22:07 pts/0    00:00:00 grep --color=auto a.out
+vagrant@precise64:/vagrant/advC$ ll /proc/2761/fd
+total 0
+dr-x------ 2 vagrant vagrant  0 Jun 20 22:07 ./
+dr-xr-xr-x 8 vagrant vagrant  0 Jun 20 22:07 ../
+lrwx------ 1 vagrant vagrant 64 Jun 20 22:07 0 -> /dev/pts/0
+l-wx------ 1 vagrant vagrant 64 Jun 20 22:07 1 -> /vagrant/advC/output
+l-wx------ 1 vagrant vagrant 64 Jun 20 22:07 2 -> /vagrant/advC/output
+```
+```
+Emulating : ./a.out 2>&1 > outfile 
+```
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+int
+main(void){
+    int close_this_fd;
+    dup2(1,2);
+    dup2(close_this_fd = open("output", O_WRONLY), 1);
+    close(close_this_fd);
+    fprintf(stdout, "standard output\n");
+    fprintf(stderr, "standard error\n");
+    fflush(stdout);
+    sleep(100);
+    return;
+}
+```
+Now examine the /proc/{pid}/fd
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+standard error
+^Z
+[1]+  Stopped                 ./a.out
+vagrant@precise64:/vagrant/advC$ ll /proc/2871/fd
+total 0
+dr-x------ 2 vagrant vagrant  0 Jun 20 22:19 ./
+dr-xr-xr-x 8 vagrant vagrant  0 Jun 20 22:19 ../
+lrwx------ 1 vagrant vagrant 64 Jun 20 22:19 0 -> /dev/pts/0
+l-wx------ 1 vagrant vagrant 64 Jun 20 22:19 1 -> /vagrant/advC/output
+lrwx------ 1 vagrant vagrant 64 Jun 20 22:19 2 -> /dev/pts/0
+```
 # 3.6 
 # If you open a file for read–write with the append flag, can you still read from anywhere in the file using lseek? Can you use lseek to replace existing data in the file? Write a program to verify this.
 Program demonstrates the solution. See answers in the comments. 
