@@ -83,4 +83,4 @@ vagrant@precise64:/vagrant/advC$ ./a.out 5 10 5<>output_file
 vagrant@precise64:/vagrant/advC$ cat output_file
 SUCCESS
 ```
-During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/<pid>/fd directory. Or just use the lsod -p <pid> command to see all open files (& file descrioptors).
+During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/{pid}/fd directory. Or just use the lsod -p <pid> command to see all open files (& file descrioptors).
