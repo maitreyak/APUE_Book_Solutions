@@ -85,6 +85,29 @@ SUCCESS
 ```
 During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/{pid}/fd directory. Or just use the lsod -p <pid> command to see all open files (& file descrioptors).
 
+# 3.3
+# Assume that a process executes the following three function calls. Draw the resulting picture, similar to Figure 3.8. Which descriptors are affected by an fcntl on fd1 with a command of F_SETFD? Which descriptors are affected by an fcntl on fd1 with a command of F_SETFL?
+    ```
+    fd1 = open(pathname, oflags);
+    fd2 = dup(fd1);
+    fd3 = open(pathname, oflags);
+    ```
+fd0 and fd1 point to the same filetable. fd2 points to a new file table. They all point to the same v-node entry.
+```
+fd0 fd_flags_0 -----\
+	  	 filetable_1 file_status_flags_0 ---\
+fd1 fd_flags_1 -----/                                \
+						      \
+						       ------V-Node (pathname)
+						      /
+						     /
+						    / 
+fd2 fd_flags_2-->filetable_2 file_status_flags_1---/
+```
+* fcntl on fd1 with a command of F_SETFD affect only fd1.
+* fcntl on fd1 with a command of F_SETFL affect both fd0 and fd1.
+
+
 # 3.5
 # The Bourne shell, Bourne-again shell, and Korn shell notation ```digit1>&digit2``` says to redirect descriptor digit1 to the same file as descriptor digit2. What is the difference between the two commands ```./a.out > outfile 2>&1 AND ./a.out 2>&1 > outfile``` ?
 
