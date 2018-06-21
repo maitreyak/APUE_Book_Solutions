@@ -107,6 +107,25 @@ fd2 fd_flags_2-->filetable_2 file_status_flags_1---/
 * fcntl on fd1 with a command of F_SETFD affect only fd1.
 * fcntl on fd1 with a command of F_SETFL affect both fd0 and fd1.
 
+# 3.4
+# The following sequence of code has been observed in various programs(below). To see why the if test is needed, assume that fd is 1 and draw a picture of what happens to the three descriptor entries and the corresponding file table entry with each call to dup2. Then assume that fd is 3 and draw the same picture.
+
+```  dup2(fd, 0);
+     dup2(fd, 1);
+     dup2(fd, 2);
+     if (fd > 2)
+         close(fd);
+```
+The above pattern can be used when spwaning deamon processes, the standard I/O filedescs 0,1,2 are redirected to /dev/null or logfile, to avoid shell interruption with the processes running in the forground. Any non-standard i.e >2, are closed to keep filedecs minimal.
+
+```  int fd;
+     fd = open("/dev/null", O_RDWR)
+     dup2(fd, 0);
+     dup2(fd, 1);
+     dup2(fd, 2);
+     if (fd > 2)
+         close(fd); //No longer need fd. (non-standard file des)  	
+```
 
 # 3.5
 # The Bourne shell, Bourne-again shell, and Korn shell notation ```digit1>&digit2``` says to redirect descriptor digit1 to the same file as descriptor digit2. What is the difference between the two commands ```./a.out > outfile 2>&1 AND ./a.out 2>&1 > outfile``` ?
