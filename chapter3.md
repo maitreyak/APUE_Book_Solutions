@@ -1,5 +1,4 @@
-# APUE_Book_Solutions
-Solutions to exercises Advanced Programming in the unix environment 
+# Chapter 3
 
 # 3.1
 # When reading or writing a disk file, are the functions described in this chapter really unbuffered? Explain.
