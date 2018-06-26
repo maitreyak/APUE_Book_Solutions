@@ -97,3 +97,11 @@ dumdum@precise64:~$ ls -l foo bar
 ---------- 1 dumdum dumdum 0 Jun 26 03:25 bar
 -rwxrwxrwx 1 dumdum dumdum 0 Jun 26 03:25 foo
 ```
+# 4.3
+# Verify that turning off user-read permission for a file that you own denies your access to the file.
+```
+dumdum@precise64:~$ cat file1
+cat: file1: Permission denied
+dumdum@precise64:~$ ls -l file1
+---------- 1 dumdum dumdum 0 Jun 26 03:30 file1
+```
