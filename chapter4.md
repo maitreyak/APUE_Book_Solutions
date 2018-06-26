@@ -105,3 +105,20 @@ cat: file1: Permission denied
 dumdum@precise64:~$ ls -l file1
 ---------- 1 dumdum dumdum 0 Jun 26 03:30 file1
 ```
+# 4.4
+# Run the program in Figure 4.9 after creating the files foo and bar. What happens?
+The permissions of the foo and bar did not change. Even after the running the program.
+```
+dumdum@precise64:~$ umask //default umask.
+0002
+dumdum@precise64:~$ touch foo bar //touch creates premissions 666 & with 002
+dumdum@precise64:~$ ls -l foo bar //same as above.
+-rw-rw-r-- 1 dumdum dumdum 0 Jun 26 04:31 bar
+-rw-rw-r-- 1 dumdum dumdum 0 Jun 26 04:31 foo
+/a.out
+dumdum@precise64:~$ ls -l foo bar
+-rw-rw-r-- 1 dumdum dumdum 0 Jun 26 04:35 bar //No change in permissions.  
+-rw-rw-r-- 1 dumdum dumdum 0 Jun 26 04:35 foo //No change in permissions.
+```
+We observe no change in file permissions. i.e the kernel only applies the umask only during file creation, which is not the case here.
+
