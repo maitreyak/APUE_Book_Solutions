@@ -56,3 +56,44 @@ file_link: symbolic_link
 file: regular
 ..: directory
 ```
+# 4.2
+# What happens if the file mode creation mask is set to 777 (octal)? Verify the results using your shell’s umask command.
+We can demo the umask on the shell and show the details using the **strace**. (my new favourite command)
+```
+dumdum@precise64:~$ umask 777
+dumdum@precise64:~$ strace -eopen touch file1 2>&1 | tail -1
+open("file1", O_WRONLY|O_CREAT|O_NOCTTY|O_NONBLOCK, 0666) = 3
+
+dumdum@precise64:~$ ls -l file1
+---------- 1 dumdum dumdum 0 Jun 26 03:30 file1
+```
+**Note:** strace is super handy util that we can use to see all the system calls invoked by a program.
+
+Below is the C program that demos the umask system call.  
+```c
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+#define RWXRWXRWX (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH|S_IXUSR|S_IXGRP|S_IXOTH)
+int
+main(void){
+        umask(0);
+        if (creat("foo", RWXRWXRWX) < 0){
+                perror("failed creation\n");
+                exit(-1);
+        }
+        umask(RWXRWXRWX);// Is the same as octet 777
+        if (creat("bar", RWXRWXRWX) < 0){
+                perror("failed creation\n");
+                exit(-1);
+        }
+        return 0;
+}
+```
+```
+dumdum@precise64:~$ ./a.out
+dumdum@precise64:~$ ls -l foo bar
+---------- 1 dumdum dumdum 0 Jun 26 03:25 bar
+-rwxrwxrwx 1 dumdum dumdum 0 Jun 26 03:25 foo
+```
