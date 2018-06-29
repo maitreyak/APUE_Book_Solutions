@@ -122,3 +122,74 @@ dumdum@precise64:~$ ls -l foo bar
 ```
 We observe no change in file permissions. i.e the kernel only applies the umask only during file creation, which is not the case here.
 
+# 4.6
+# Write a utility like cp(1) that copies a file containing holes, without writing the bytes of 0 to the output file.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+
+int
+main(int argc, char *argv[]){
+    if(argc <3){
+        printf("Not enough args");
+        exit(-1);
+    }
+    int BUFFER_SIZE =1024;
+    char buffer[BUFFER_SIZE];
+    char subbuffer[BUFFER_SIZE];
+    int readFd = open(argv[1], O_RDONLY);
+    int writeFd = creat(argv[2], O_TRUNC);
+    int bytes;
+    int i=0,j=0;
+    int subBufBytes;
+    int holeOffset = 0;
+
+    while((bytes = read(readFd, buffer, BUFFER_SIZE)) > 0 ) {
+        subBufBytes = 0; //init subbuffer valid bytes reads;
+        for(i=0; i < bytes; i++){
+            if( buffer[i] == '\0' ) {
+                ++holeOffset;
+                continue;
+            }
+
+            for(j=i; j< bytes; j++){
+                if(buffer[j] == '\0'){
+                    break;
+                }
+                subbuffer[subBufBytes++] = buffer[j];
+            }
+            i = j-1;
+            if(subBufBytes > 0 ) {
+                lseek(writeFd, (int)lseek(writeFd,holeOffset, SEEK_CUR), SEEK_SET);
+                write(writeFd, subbuffer, subBufBytes);
+                holeOffset =0;
+            }
+        }
+    }
+return 0;
+```
+The above copy program reads bytes into src a buffer and then analyzes the buffer to find valid bytes that are written into new file.
+
+```
+vagrant@precise64:/vagrant/advC$ cp --sparse=never file.hole file2.hole #for comparison cp file.hole with sparse set to false. 
+vagrant@precise64:/vagrant/advC$ ./a.out file.hole file3.hole # Now lets run our program with sparse file detection.
+vagrant@precise64:/vagrant/advC$ ll file.hole file2.hole file3.hole # They all report the same size.
+-rw-r--r-- 1 vagrant vagrant 100048586 Jun 29 09:32 file2.hole
+-rw------- 1 vagrant vagrant 100048586 Jun 29 09:33 file3.hole
+-rw-r--r-- 1 vagrant vagrant 100048586 Jun 29 09:26 file.hole
+vagrant@precise64:/vagrant/advC$ du file.hole file2.hole file3.hole # du shows the real picture.
+8	file.hole
+97704	file2.hole
+8	file3.hole
+```
+The alternate approach to the problem would be to use SEEK_HOLE and SEEK_DATA introduced in linux 3.1. The system support would greatly simply the above program.
+
+**Note**
+The program to create the sparse file listed in **Example 3.2** will not create a real sparse file on a modern Linux.
+That is because the file has to be sufficently large for the kernel/fs to detect a sparse file write.
+Therefore change in **Example 3.2** 
+```if (lseek(fd, 16384, SEEK_SET) == -1)``` to ```if( lseek(fd, 100048576, SEEK_SET) == -1 )```
+to create a sparse file (like file.hole in the above solution).
