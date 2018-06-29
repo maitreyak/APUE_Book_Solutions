@@ -122,6 +122,11 @@ dumdum@precise64:~$ ls -l foo bar
 ```
 We observe no change in file permissions. i.e the kernel only applies the umask only during file creation, which is not the case here.
 
+# 4.5
+# In Section 4.12, we said that a file size of 0 is valid for a regular file. We also said that the st_size field is defined for directories and symbolic links. Should we ever see a file size of 0 for a directory or a symbolic link?
+File sizes of Symbolic links is the length of absolute path that it points to. Therefore, cannot be 0.
+Directories point to **.** **..** in them by default, hence cannot be size 0. 
+
 # 4.6
 # Write a utility like cp(1) that copies a file containing holes, without writing the bytes of 0 to the output file.
 ```c
