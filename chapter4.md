@@ -223,3 +223,57 @@ umask
 ls -l core.copy
 -rw-rw-r-- 1 sar   8483248 Nov 18 12:18 core
 ```
+# 4.8 
+# When running the program in Figure 4.16, we check the available disk space with the df(1) command. Why didn’t we use the du(1) command?
+In the example, once we unlink the file, the file is no longer accessible via shell or the du shell command. Hence df is used on the current directory to show the change in data blocks post unlinking of the file.
+
+# 4.9 
+# In Figure 4.20, we show the unlink function as modifying the changed-status time of the file itself. How can this happen?
+Unlinking the file, descreses the count of links on the files inode, thus it affects the file change_status time. (st_ctime). 
+
+To demo the above, lets setup a file with 2 hardlinks i.e two directories pointing to the same file's inode and execute code to unlink the file. 
+```
+root@precise64:~# ll randomFile
+-rwxrwxrwx 1 vagrant vagrant 0 Jun 19 04:07 randomFile*
+root@precise64:~# ln randomFile demo/randomFile
+root@precise64:~# ll randomFile
+-rwxrwxrwx 2 vagrant vagrant 0 Jun 19 04:07 randomFile* <-The number 2 indicates two hard links
+```
+```
+root@precise64:~# gcc -g unlink_ctime.c
+root@precise64:~# ./a.out demo/randomFile
+1530377583 file st_ctime and 2 file links
+1530377631 file st_ctime and 1 file links <-The number 1 indicates one hard links. 
+```
+Notice the unlinking was successful and the st_ctime has changed. 
+
+The code for the program used is below. 
+```c
+/*unlink_ctime.c*/
+#include <stdio.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <fcntl.h>
+int
+main(int argc, char *argv[]) {
+    struct stat buf;
+    int fd;
+    if( (fd = open(argv[1], O_RDONLY)) < 0 ){
+        perror("");
+        exit(-1);
+    }
+    if((int)fstat(fd, &buf) < 0) {
+        perror("");
+        exit(-1);
+    }
+    printf("%d file st_ctime and %d file links\n",(int)buf.st_ctime, (int)buf.st_nlink );
+    unlink(argv[1]);
+    if((int)fstat(fd, &buf) < 0) {
+        perror("");
+        exit(-1);
+    }
+    printf("%d file st_ctime and %d file links\n",(int)buf.st_ctime, (int)buf.st_nlink );
+    return 0;
+}
+```
