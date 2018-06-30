@@ -214,9 +214,9 @@ ls -l core
 -rw-r--r-- 1 sar   8483248 Nov 18 12:18 core
 ```
 Coping the file using the ```cat core > core.copy ``` is done using the following steps.
-Cat command writes the contents of the file core to stdout.
-The shell opens the file core.copy (say file desc: fd_core_copy) in standard file mode i.e mode 666 and applies the shell umask(002 in this case).
-Shell redirects the IO using dup2(fd_core_copy, stdout)
++ Cat command writes the contents of the file core to stdout.
++ The shell opens the file core.copy (say file desc: fd_core_copy) in standard file mode i.e mode 666 and applies the shell umask(002 in this case).
++ Shell redirects the IO using dup2(fd_core_copy, stdout)
 ```
 umask
 002
