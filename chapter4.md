@@ -198,3 +198,28 @@ That is because the file has to be sufficently large for the kernel/fs to detect
 Therefore change in **Example 3.2** 
 ```if (lseek(fd, 16384, SEEK_SET) == -1)``` to ```if( lseek(fd, 100048576, SEEK_SET) == -1 )```
 to create a sparse file (like file.hole in the above solution).
+
+# 4.7 
+# Note in the output from the ls command in Section 4.12 that the files core and core.copy have different access permissions. If the umask value didn’t change between the creation of the two files, explain how the difference could have occurred.
+The program used to create the file file used mode
+```c
+#define FILE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+    
+    if ((fd = creat("file.hole", FILE_MODE)) < 0)
+    
+```
+Therefore, we see 
+```
+ls -l core
+-rw-r--r-- 1 sar   8483248 Nov 18 12:18 core
+```
+Coping the file using the ```cat core > core.copy ``` is done using the following steps.
+Cat command writes the contents of the file core to stdout.
+The shell opens the file core.copy (say file desc: fd_core_copy) in standard file mode i.e mode 666 and applies the shell umask(002 in this case).
+Shell redirects the IO using dup2(fd_core_copy, stdout)
+```
+umask
+002
+ls -l core.copy
+-rw-rw-r-- 1 sar   8483248 Nov 18 12:18 core
+```
