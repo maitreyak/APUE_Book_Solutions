@@ -277,3 +277,153 @@ main(int argc, char *argv[]) {
     return 0;
 }
 ```
+# 4.10 
+# In Section 4.22, how does the system’s limit on the number of open files affect the myftw function?
+The program uses the opendir to open sub directories in directory tree structure. If one such leaf is lies very deep in the tree, the program has to keep all its parent directories(which are also files in UNIX) open, thus is limited by the system limit of max open files. 
+
+# 4.11 
+# In Section 4.22, our version of ftw never changes its directory. Modify this routine so that each time it encounters a directory, it uses the chdir function to change to that directory, allowing it to use the filename and not the pathname for each call to lstat. When all the entries in a directory have been processed, execute chdir(".."). Compare the time used by this version and the version in the text.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <limits.h>
+#include <string.h>
+
+#define FTW_F 1 // Is a file
+#define FTW_D 2 //Is a dir
+#define FTW_DNR 3//dir cannot be read
+#define FTW_NS	4//Cannot stat file
+
+typedef int Myfunc(const char *, const struct stat *, int);
+static Myfunc myfunc;
+static int myftw(const char *, Myfunc *);
+static int dopath(Myfunc *, const char *);
+static long nreg, ndir, nblk, nchr, nfifo, nslink, nsock, ntot;
+
+int
+main(int argc, char *argv[]){
+	int ret;
+	if(argc < 2) {
+		fprintf(stderr, "Not enough args\n");
+		exit(-1);
+	}
+	
+	ret = myftw(argv[1], myfunc);
+	
+	ntot = nreg + ndir + nblk + nchr + nfifo + nslink + nsock;	
+	printf("Total number of files scanned %ld\n", ntot);
+	if(ntot == 0 ){ntot = 1;}//avoid divide by zero errors
+	printf("Regular files %ld: percent %5.2f\n", nreg, nreg*100.0/ntot);	
+	printf("Directories %ld: percent %5.2f\n", ndir, ndir*100.0/ntot);
+	printf("Block special %ld: percent %5.2f\n", nblk, nblk*100.0/ntot);
+	printf("Char special %ld: percent %5.2f\n", nchr, nchr*100.0/ntot);
+	printf("FIFO %ld: percent %5.2f\n", nfifo, nfifo*100.0/ntot);
+	printf("Symbolic links %ld: percent %5.2f\n", nslink, nslink*100.0/ntot);
+	printf("Sockets %ld: percent %5.2f\n", nsock, nsock*100.0/ntot);
+	return ret;
+}
+
+
+static int
+myftw(const char *pathname, Myfunc *func){ 
+	 return  dopath(func, pathname);
+}
+
+static int
+dopath(Myfunc *func, const char *path){
+	struct stat buf;
+	struct dirent *dirp; 
+	DIR *dp;
+	int ret;
+	if(lstat(path, &buf) < 0) {
+		return (func(path, &buf, FTW_NS));
+	}
+	if(S_ISDIR(buf.st_mode) == 0) { 
+		return (func(path, &buf, FTW_F));
+	}	
+	//it is a dir. 
+	chdir(path);
+	if( (ret = func(".", &buf, FTW_D)) !=0 ){
+		return ret;	
+	}
+	
+	if ((dp = opendir(".")) == NULL) {
+		return (func(".", &buf, FTW_DNR));
+	}
+
+	while((dirp = readdir(dp)) != NULL){
+		if(strcmp(dirp->d_name,".") == 0 || strcmp(dirp->d_name, "..") == 0){
+			continue;
+		}
+		if((ret = dopath(func, dirp->d_name)) != 0){
+			break;	
+		}
+	}	
+	chdir("..");
+	if(closedir(dp) < 0){
+		perror(path);
+	}
+	return ret;
+}
+
+static int
+myfunc(const char *pathname, const struct stat *statptr, int type){
+	switch(type){
+		case FTW_F:
+			switch(statptr->st_mode & S_IFMT) {
+				case S_IFREG: nreg++; break;
+				case S_IFBLK: nblk++; break;
+				case S_IFCHR: nchr++; break;
+				case S_IFIFO: nfifo++; break;
+				case S_IFLNK: nslink++; break;
+				case S_IFSOCK: nsock++; break;
+			}
+		break;
+		case FTW_D:
+			ndir++;
+			break;
+		case FTW_DNR:
+			fprintf(stderr, "Dir cannot be read %s\n", pathname);
+			return -1;
+		case FTW_NS:
+			fprintf(stderr, "Cannot stat file %s\n", pathname);
+			return -1;
+	}
+	return 0;
+}
+```
+Comparing the time. The chdir version is faster.
+```
+root@precise64:/vagrant/advC# gcc -g myftw.c
+root@precise64:/vagrant/advC# time ./a.out /vagrant/advC/
+Total number of files scanned 168
+Regular files 110: percent 65.48
+Directories 57: percent 33.93
+Block special 0: percent  0.00
+Char special 0: percent  0.00
+FIFO 0: percent  0.00
+Symbolic links 1: percent  0.60
+Sockets 0: percent  0.00
+
+real	0m0.124s
+user	0m0.000s
+sys	0m0.048s
+root@precise64:/vagrant/advC# gcc -g myftw_chdir.c
+root@precise64:/vagrant/advC# time ./a.out /vagrant/advC/
+Total number of files scanned 168
+Regular files 110: percent 65.48
+Directories 57: percent 33.93
+Block special 0: percent  0.00
+Char special 0: percent  0.00
+FIFO 0: percent  0.00
+Symbolic links 1: percent  0.60
+Sockets 0: percent  0.00
+
+real	0m0.076s
+user	0m0.000s
+sys	0m0.028s
+```
