@@ -396,9 +396,10 @@ myfunc(const char *pathname, const struct stat *statptr, int type){
 	return 0;
 }
 ```
-Comparing the time. The chdir version is faster.
+Comparing the time. The chdir version is faster. Which is surprising as the chdir version uses more system calls than the original. 
+TODO: Need more invetigation about the internal kernel caching with the chdir.
 ```
-root@precise64:/vagrant/advC# gcc -g myftw.c
+root@precise64:/vagrant/advC# gcc -g myftw.c (Orignial program.)
 root@precise64:/vagrant/advC# time ./a.out /vagrant/advC/
 Total number of files scanned 168
 Regular files 110: percent 65.48
@@ -412,7 +413,8 @@ Sockets 0: percent  0.00
 real	0m0.124s
 user	0m0.000s
 sys	0m0.048s
-root@precise64:/vagrant/advC# gcc -g myftw_chdir.c
+
+root@precise64:/vagrant/advC# gcc -g myftw_chdir.c (Modified program.)
 root@precise64:/vagrant/advC# time ./a.out /vagrant/advC/
 Total number of files scanned 168
 Regular files 110: percent 65.48
@@ -423,7 +425,7 @@ FIFO 0: percent  0.00
 Symbolic links 1: percent  0.60
 Sockets 0: percent  0.00
 
-real	0m0.076s
+***real	0m0.076s
 user	0m0.000s
-sys	0m0.028s
+sys	0m0.028s***
 ```
