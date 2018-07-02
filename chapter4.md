@@ -397,7 +397,7 @@ myfunc(const char *pathname, const struct stat *statptr, int type){
 }
 ```
 Comparing the time. The chdir version is faster. Which is surprising as the chdir version uses more system calls than the original. 
-TODO: Need more invetigation about the internal kernel caching with the chdir.
+**TODO: Need more invetigation about the internal kernel caching with the chdir.**
 ```
 root@precise64:/vagrant/advC# gcc -g myftw.c (Orignial program.)
 root@precise64:/vagrant/advC# time ./a.out /vagrant/advC/
