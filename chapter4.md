@@ -429,3 +429,30 @@ Sockets 0: percent  0.00
 user	0m0.000s
 sys	0m0.028s***
 ```
+# 4.12 
+# Each process also has a root directory that is used for resolution of absolute pathnames. This root directory can be changed with the chroot function. Look up the description for this function in your manuals. When might this function be useful?
+The chroot is handly to isolate process from accessing parent directories. The program below will demonstrate the system command.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
+int
+main(void) {
+    if (chroot(".") <0){
+        perror("Failed to chroot to the current dir");
+    }
+    char *ptr = (char*)malloc(PATH_MAX);
+    printf("The current root dir of the program is %s\n", getcwd(ptr, PATH_MAX));
+    if (chdir("..") < 0){
+        perror("Failed to goto parent dir");
+    }
+    printf("The current root dir of the program is %s\n", getcwd(ptr, PATH_MAX));
+    return 0;
+}
+```
+```
+root@precise64:/vagrant/advC# ./a.out
+The current root dir of the program is / <--- /vagrant/advC is the / (root) dir for the current program. 
+The current root dir of the program is / <--- the chdir to parent dir has no effect.
+```
