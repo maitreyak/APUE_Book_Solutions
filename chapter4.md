@@ -497,7 +497,7 @@ main(int argc, char *argv[]) {
     exit(errno);
 }
 ```
-Emparically, the depth of the dir tree is affected by the lenght of the dir name. Dir "small" gives us a depth of 167 while dir "realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog" has depth of 13. Both are well short of the PATH_MAX limit of 4098. TODO investigate how mkdir depth is affected by dir name. 
+Emparically, the depth of the dir tree is affected by the lenght of the dir name. Dir "small" gives us a depth of 167 while dir "realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog" has depth of 13. Both are well short of the PATH_MAX limit of 4098. Need to investigate how mkdir depth is affected by dir name. (See github issues.)
 ```
 root@precise64:/vagrant/advC# ./a.out small
 mkdir: Protocol error
@@ -520,4 +520,4 @@ root@precise64:/vagrant/advC# ./a.out aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 mkdir: Protocol error
 Dir depth:0 PATH_MAX 4096 path length 13
 ```
-
+tar compress and uncompress work normally. Along with almost all unix system tools. (See github issues.)
