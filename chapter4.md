@@ -522,3 +522,35 @@ mkdir: Protocol error
 Dir depth:0 PATH_MAX 4096 path length 13
 ```
 tar compress and uncompress work normally. Along with almost all unix system tools. (See github issues.)
+
+# 4.17 
+# In Section 3.16, we described the /dev/fd feature. For any user to be able to access these files, their permissions must be rw-rw-rw-. Some programs that create an output file delete the file first, in case it already exists, ignoring the return code: What happens if path is /dev/fd/1?
+```c
+unlink(path);
+if ((fd = creat(path, FILE_MODE)) < 0)
+    err_sys(...);
+```
+
+The modified the above, to print the unlink error and write a string. When /dev/fd/1 is passed as the argument, unlink operation fails, but we are still able to open and write to the stdout descriptor.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+int
+main(int argc , char *argv[]){
+    int fd;
+    if(unlink(argv[1]) < 0){
+        perror("unlink error");
+    }
+    if ((fd = creat(argv[1], 0666)) < 0) {
+        perror("creat error");
+    }
+    write(fd, "write to console stdout\n",23);
+}
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out /dev/fd/1
+unlink error: Operation not permitted
+write to console stdout
+```
