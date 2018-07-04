@@ -456,3 +456,68 @@ root@precise64:/vagrant/advC# ./a.out
 The current root dir of the program is / <--- /vagrant/advC is the / (root) dir for the current program. 
 The current root dir of the program is / <--- the chdir to parent dir has no effect.
 ```
+# 4.16 
+# Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?
+The program recursively creates child dir until the program errors out. 
+
+```C
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <errno.h>
+#include <string.h>
+
+int
+main(int argc, char *argv[]) {
+    if(argc <2) {
+        printf("need args\n");
+        exit(-1);
+    }
+    int depth =0;
+    char *path = (char *)malloc(PATH_MAX);
+    while(1) {
+        if(getcwd(path,PATH_MAX) <0 ) {
+            perror("getcwd");
+            break;
+        }
+        if(mkdir(argv[1],0777) <0 ) {
+            perror("mkdir");
+            break;
+        }
+        if(chdir(argv[1]) <0 ) {
+            perror("chdir");
+            break;
+        }
+        depth++;
+    }
+    printf("Dir depth:%d PATH_MAX %d path length %ld\n", depth, (int)PATH_MAX, strlen(path));
+    printf("%s\n", path);
+    free(path);
+    exit(errno);
+}
+```
+Emparically, the depth of the dir tree is affected by the lenght of the dir name. Dir "small" gives us a depth of 167 while dir "realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog" has depth of 13. Both are well short of the PATH_MAX limit of 4098. TODO investigate how mkdir depth is affected by dir name. 
+```
+root@precise64:/vagrant/advC# ./a.out small
+mkdir: Protocol error
+Dir depth:167 PATH_MAX 4096 path length 1015
+/vagrant/advC/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small/small
+root@precise64:/vagrant/advC# ./a.out realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog
+mkdir: Protocol error
+Dir depth:13 PATH_MAX 4096 path length 949
+/vagrant/advC/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog/realllllllllllllllllllllyloooooooooooooooooooooooooooooooooooooooooooog
+```
+The dir names longer than the NAME_MAX(255) fail to create. 
+```
+root@precise64:/vagrant/advC# getconf NAME_MAX /
+255
+
+root@precise64:/vagrant/advC# echo "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"| wc -c
+256
+
+root@precise64:/vagrant/advC# ./a.out aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+mkdir: Protocol error
+Dir depth:0 PATH_MAX 4096 path length 13
+```
+
