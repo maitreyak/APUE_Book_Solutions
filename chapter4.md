@@ -458,6 +458,8 @@ The current root dir of the program is / <--- the chdir to parent dir has no eff
 ```
 # 4.13
 # How can you set only one of the two time values with the utimes function?
+***note*** utimes function is [deprecated](http://pubs.opengroup.org/onlinepubs/9699919799/functions/utimensat.html)
+Using the utime function instead.
 Sets the access time to current time without changing the modify time.
 ```c
 #include <stdio.h>
