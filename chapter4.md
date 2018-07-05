@@ -456,6 +456,36 @@ root@precise64:/vagrant/advC# ./a.out
 The current root dir of the program is / <--- /vagrant/advC is the / (root) dir for the current program. 
 The current root dir of the program is / <--- the chdir to parent dir has no effect.
 ```
+# 4.13
+# How can you set only one of the two time values with the utimes function?
+Sets the access time to current time without changing the modify time.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <utime.h>
+
+int
+main(int argc, char *argv[]){
+    if(argc < 2){
+        exit(-1);
+    }
+    struct stat fileStat;
+    if(lstat(argv[1], &fileStat) < 0 ){
+        perror("lstat");
+        exit(-1);
+    }
+    struct utimbuf buf;
+    buf.modtime = fileStat.st_mtime;
+   if( utime(argv[1], &buf) < 0){
+        perror("utimes");
+    }
+    return 0 ;
+}
+```
+
 # 4.16 
 # Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?
 **[github issue](https://github.com/maitreyak/APUE_Book_Solutions/issues/1)***
