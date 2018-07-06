@@ -516,6 +516,32 @@ Notice stat system call has been called on ```/var/mail/dumdum```. Which would e
 
 # 4.15 
 # Examine the archive formats used by the cpio(1) and tar(1) commands. (These descriptions are usually found in Section 5 of the UNIX Programmer’s Manual.) How many of the three possible time values are saved for each file? When a file is restored, what value do you think the access time is set to, and why?
+```
+vagrant@precise64:/vagrant/advC$ stat file1
+  File: `file1'
+  Size: 10240     	Blocks: 24         IO Block: 4096   regular file
+Device: 14h/20d	Inode: 270281      Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/ vagrant)   Gid: ( 1000/ vagrant)
+Access: 2018-07-06 14:07:09.000000000 +0000
+Modify: 2018-07-06 14:05:26.000000000 +0000
+Change: 2018-07-06 14:07:09.000000000 +0000
+ Birth: -
+vagrant@precise64:/vagrant/advC$ tar -cvf file1.tar file1
+file1
+vagrant@precise64:/vagrant/advC$ tar -xvf file1.tar
+file1
+tar: file1: time stamp 2018-07-06 14:05:26 is 727.576699033 s in the future
+vagrant@precise64:/vagrant/advC$ stat file1
+  File: `file1'
+  Size: 10240     	Blocks: 24         IO Block: 4096   regular file
+Device: 14h/20d	Inode: 270283      Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/ vagrant)   Gid: ( 1000/ vagrant)
+Access: 2018-07-06 14:08:48.000000000 +0000
+Modify: 2018-07-06 14:05:26.000000000 +0000
+Change: 2018-07-06 14:08:48.000000000 +0000
+ Birth: -
+```
+Notice the untar archived file ```file1``` only has a diffrent access time.
 
 # 4.16 
 # Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?
