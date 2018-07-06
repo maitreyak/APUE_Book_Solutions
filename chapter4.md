@@ -541,7 +541,35 @@ Modify: 2018-07-06 14:05:26.000000000 +0000
 Change: 2018-07-06 14:08:48.000000000 +0000
  Birth: -
 ```
-Notice the untar archived file ```file1``` only has a diffrent access time.
+Notice the untar archived file ```file1``` only the modify time is preserved. That is because this tar header only preserves the mtime of the file. The archive tar format used here is POSIX GNU.
+```
+vagrant@precise64:/vagrant/advC$ file file1.tar
+file1.tar: POSIX tar archive (GNU)
+```
+If you notice the header, it captures only the mtime of the file.
+```
+struct posix_header
+{                              /* byte offset */
+  char name[100];               /*   0 */
+  char mode[8];                 /* 100 */
+  char uid[8];                  /* 108 */
+  char gid[8];                  /* 116 */
+  char size[12];                /* 124 */
+  char mtime[12];               /* 136 */
+  char chksum[8];               /* 148 */
+  char typeflag;                /* 156 */
+  char linkname[100];           /* 157 */
+  char magic[6];                /* 257 */
+  char version[2];              /* 263 */
+  char uname[32];               /* 265 */
+  char gname[32];               /* 297 */
+  char devmajor[8];             /* 329 */
+  char devminor[8];             /* 337 */
+  char prefix[155];             /* 345 */
+                                /* 500 */
+};
+```
+Hence, only the mtime is restored. We could use other file formats to perserve the atime duriung archive creation and possibly preserve both atime and mtimes.
 
 # 4.16 
 # Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?
