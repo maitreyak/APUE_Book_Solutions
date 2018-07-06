@@ -487,6 +487,35 @@ main(int argc, char *argv[]){
     return 0 ;
 }
 ```
+# 4.14 
+# Some versions of the finger(1) command output “New mail received ...” and “unread since ...” where ... are the corresponding times and dates. How can the program determine these two times and dates?
+To setup, send a mail to another user on the system using the linux ```mail``` tool.(or similar)
+```
+vagrant@precise64:/vagrant/advC$ mail dumdum
+```
+As root user you can use the finger command on user dumdum
+```
+root@precise64:/vagrant/advC# finger dumdum
+Login: dumdum         			Name:
+Directory: /home/dumdum             	Shell: /bin/bash
+On since Fri Jul  6 13:22 (UTC) on pts/1 from 10.0.2.2
+   2 minutes 46 seconds idle
+New mail received Fri Jul  6 13:44 2018 (UTC)
+     Unread since Fri Jul  6 13:30 2018 (UTC)
+No Plan.
+```
+Upon strace for the system call ```stat```
+```
+root@precise64:/vagrant/advC# strace -estat finger dumdum 1>/dev/null
+stat("/var/mail/dumdum", {st_mode=S_IFREG|0600, st_size=913, ...}) = 0
+stat("/dev//pts/1", {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 1), ...}) = 0
+stat("/etc/localtime", {st_mode=S_IFREG|0644, st_size=118, ...}) = 0
+stat("/etc/localtime", {st_mode=S_IFREG|0644, st_size=118, ...}) = 0
+```
+Notice stat system call has been called on ```/var/mail/dumdum```. Which would explain how finger reports the times and dates of unread mails.
+
+# 4.15 
+# Examine the archive formats used by the cpio(1) and tar(1) commands. (These descriptions are usually found in Section 5 of the UNIX Programmer’s Manual.) How many of the three possible time values are saved for each file? When a file is restored, what value do you think the access time is set to, and why?
 
 # 4.16 
 # Does the UNIX System have a fundamental limitation on the depth of a directory tree? To find out, write a program that creates a directory and then changes to that directory, in a loop. Make certain that the length of the absolute pathname of the leaf of this directory is greater than your system’s PATH_MAX limit. Can you call getcwd to fetch the directory’s pathname? How do the standard UNIX System tools deal with this long pathname? Can you archive the directory using either tar or cpio?
