@@ -65,3 +65,37 @@ TRUE is UnBuffered
 FALSE is LineBuffered
 FALSE is FullyBuffered
 ```
+# 5.2 
+# Type in the program that copies a file using line-at-a-time I/O (fgets and fputs) from Figure 5.5, but use a MAXLINE of 4. What happens if you copy lines that exceed this length? Explain what is happening.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+int
+main(void)
+{
+    int maxline = 4;
+    char  buf[maxline];
+    int count =0;
+    while (fgets(buf, maxline, stdin) != NULL){
+        if (fputs(buf, stdout) == EOF){
+            perror("output error");
+            exit(-1);
+        }
+    }
+    if (ferror(stdin)){
+        perror("input error");
+        exit(-1);
+    }
+    exit(0);
+}
+```
+Even if the input is larger than the buffer, the loop has do do more work bylooking until it see's EOF(\0) char.
+The performce would be slower as the program invokes more write system calls as seen below.
+```
+read(0, 12345678
+"12345678\n", 1024)             = 9
+fstat(1, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
+mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fd22330f000
+write(1, "123", 3123)                      = 3
+exit_group(0)
+```
