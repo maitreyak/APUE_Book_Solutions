@@ -117,3 +117,19 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 0
 ```
 Zero is the number of char actually written to the output stream. (stdout)
+
+# 5.4 
+# The following code works correctly on some machines, but not on others. What could be the problem?
+```c
+#include    <stdio.h>
+
+int
+main(void)
+{
+    char    c;
+
+    while ((c = getchar()) != EOF)
+        putchar(c);
+}
+```
+System define the default char type is signed char or a unsigned char. If the the default is signed char the program would work normally as EOF converts to ```-1```, which is set properly in an signed type. However, if unsigned is used the the EOF condition never computes to true, thus the program infinite loops, incorrectly, ofcourse.   
