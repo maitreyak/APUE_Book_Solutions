@@ -99,3 +99,21 @@ mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7fd
 write(1, "123", 3123)                      = 3
 exit_group(0)
 ```
+# 5.3 
+# What does a return value of 0 from printf mean?
+Printf returns the number of chars before it sees the first ```\0``` passed to the underlying ``write``` system call 
+```c
+#include <stdio.h>
+#include <fcntl.h>
+int
+main(void) {
+    int count = printf("\0therisalotmoredata");
+    printf("%d\n",count);
+    return 0;
+}
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+0
+```
+Zero is the number of char actually written to the output stream. (stdout)
