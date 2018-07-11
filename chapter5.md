@@ -133,3 +133,26 @@ main(void)
 }
 ```
 System define the default char type is signed char or a unsigned char. If the the default is signed char the program would work normally as EOF converts to ```-1```, which is set properly in an signed type. However, if unsigned is used the the EOF condition never computes to true, thus the program infinite loops, incorrectly, ofcourse.   
+
+# 5.5 
+# How would you use the fsync function (Section 3.13) with a standard I/O stream?
+fsync needs file descriptor, we can get the fd from the FILE pointer using the ```fileno``` library function.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+int main(void){
+    FILE *fp;
+    if( (fp = fopen("file1", "w+")) < 0 ){
+        perror("Open file");
+        exit(-1);
+    }
+    fprintf(fp, "hello there");
+    int fd = fileno(fp); //gets the file desc from the file pointer
+    fsync(fd); //fsync can now be called easily
+    return 0;
+}
+```
+# 5.6 
+# In the programs in Figures 1.7 and 1.10, the prompt that is printed does not contain a newline, and we don’t call fflush. What causes the prompt to be output?
+fgets flushes the output streams before executing.
