@@ -156,3 +156,6 @@ int main(void){
 # 5.6 
 # In the programs in Figures 1.7 and 1.10, the prompt that is printed does not contain a newline, and we don’t call fflush. What causes the prompt to be output?
 fgets flushes the output streams before executing.
+
+# 5.7 
+# BSD-based systems provide a function called funopen that allows us to intercept read, write, seek, and close calls on a stream. Use this function to implement fmemopen for FreeBSD and Mac OS X.
