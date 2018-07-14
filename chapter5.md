@@ -159,3 +159,84 @@ fgets flushes the output streams before executing.
 
 # 5.7 
 # BSD-based systems provide a function called funopen that allows us to intercept read, write, seek, and close calls on a stream. Use this function to implement fmemopen for FreeBSD and Mac OS X.
+The scope of the above problem is quite large. The below program complied on Mac OS X, demonstrates the ideas required to implment ```linux fmemopen``` using ```BSD funopen```.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+FILE* fmemopen(void *restrict , size_t size, const char *restrict );
+
+static int readfn(void *, char *, int);
+static int writefn(void *, const char *, int); 
+static fpos_t seekfn(void *, fpos_t, int);
+static int closefn(void *);
+
+struct fmem_struct {
+	char *buf;
+	int sysbuf;
+	size_t pos;
+	size_t size;
+};
+
+static struct fmem_struct *fmem; 
+
+int
+main(void) {
+	FILE *fp;
+	fp = fmemopen(NULL, 1024,"a"); 
+	fprintf(fp ,"The partial implementaion of the BSD fmemopen but you get the idea right?");
+	fclose(fp);
+	printf("Buffer contents:\n%s\n", fmem->buf);
+	return 0;
+}
+FILE *fmemopen(void *restrict buf, size_t size,
+               const char *restrict type){
+	extern struct fmem_struct *fmem; 
+	//alocate the structure.
+	fmem = (struct fmem_struct *)malloc(sizeof(struct fmem_struct));
+	if (buf == NULL) {
+		buf = (char *)malloc(size);	
+	}
+	fmem->buf = buf;
+	fmem->size = size;
+	fmem->pos = 0; //init the position of the buffer. Ignoring the type for this implmentation.   
+	memset(fmem->buf, '\0', size);	
+
+	FILE *fp;
+	fp = funopen(NULL, readfn, writefn, seekfn, closefn); 
+	return fp;
+}
+
+static int 
+readfn(void *cookie, char *buf, int len){
+	strncpy(buf, (fmem->buf)+(fmem->pos), (size_t)len);
+	return len;
+}
+static int 
+writefn(void *cookie, const char *buf, int len){
+	strncpy((fmem->buf)+(fmem->pos), buf,(size_t)len);
+	fmem->pos +=len;
+	return len;
+} 
+
+static fpos_t 
+seekfn(void *cookie, fpos_t offset, int whence){
+	//ignoring the implmentation for this excerise.
+	printf("no operation\n");
+	return offset;
+}
+
+static int 
+closefn(void *cookie){
+	*((fmem->buf)+(fmem->pos)+1)='\0';
+	return 0;				
+}
+
+```
+```
+ $./a.out
+Buffer contents:
+The partial implementaion of the BSD fmemopen but you get the idea right?
+```
