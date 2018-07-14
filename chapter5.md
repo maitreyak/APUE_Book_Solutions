@@ -159,7 +159,7 @@ fgets flushes the output streams before executing.
 
 # 5.7 
 # BSD-based systems provide a function called funopen that allows us to intercept read, write, seek, and close calls on a stream. Use this function to implement fmemopen for FreeBSD and Mac OS X.
-The scope of the above problem is quite large. The below program complied on Mac OS X, demonstrates the ideas required to implment ```linux fmemopen``` using ```BSD funopen```.
+The scope of the above problem is quite large. The below program complied on Mac OS X demonstrates the ideas required to implement ```linux fmemopen``` using ```BSD funopen```.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
