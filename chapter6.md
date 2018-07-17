@@ -67,3 +67,38 @@ Linux precise64 3.2.0-23-generic #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012 x86
 ```
 # 6.4 
 # Calculate the latest time that can be represented by the time_t data type. After it wraps around, what happens?
+
+# 6.5
+# Write a program to obtain the current time and print it using strftime, so that it looks like the default output from date(1). Set the TZ environment variable to different values and see what happens.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int main(void)
+{
+    time_t     now;
+    struct tm *ts;
+    char       buf[80];
+
+    setenv("TZ", "Australia/Brisbane", 1);
+    tzset();
+    time(&now);
+
+    ts = localtime(&now);
+    strftime(buf, sizeof(buf), "%a %Y-%m-%d %H:%M:%S %Z", ts);
+    puts(buf);
+
+    return 0;
+}
+```
+The above program outputs the time for ```Australia/Brisbane``` in the ```date(1)``` command format. 
+```
+➜  advC ./a.out
+Tue 2018-07-17 15:31:22 AEST
+```
+The date outout should be on my machines local timezone CDT. (Yikes now you know where I live. Sort of.)
+```
+➜  advC date
+Tue Jul 17 00:32:38 CDT 2018
+```
