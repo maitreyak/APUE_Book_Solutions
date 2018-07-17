@@ -65,3 +65,5 @@ Comparing with the command. ```uname -a``` the output is nearly the same.
 root@precise64:/vagrant/advC# uname -a
 Linux precise64 3.2.0-23-generic #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux
 ```
+# 6.4 
+# Calculate the latest time that can be represented by the time_t data type. After it wraps around, what happens?
