@@ -32,3 +32,36 @@ Encrypted password $6$aqzOtgCM$OxgoMP4JoqMJ1U1F3MZPo2iBefDRnRCXSfgIM36E5cfMNcE7G
 ```
 # 6.3 
 # Write a program that calls uname and prints all the fields in the utsname structure. Compare the output to the output from the uname(1) command.
+```c
+#include <sys/utsname.h>
+#include <stdio.h>
+
+int
+main(int argc, char *argv[]) {
+    struct utsname unm;
+    if (uname(&unm) < 0) {
+        perror("uname error");
+        return -1;
+    }
+
+    printf("sysname:  %s\n", unm.sysname);
+    printf("nodename: %s\n", unm.nodename);
+    printf("release:  %s\n", unm.release);
+    printf("version:  %s\n", unm.version);
+    printf("machine:  %s\n", unm.machine);
+    return 0;
+}
+```
+```
+root@precise64:/vagrant/advC# ./a.out
+sysname:  Linux
+nodename: precise64
+release:  3.2.0-23-generic
+version:  #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012
+machine:  x86_64
+```
+Comparing with the command. ```uname -a``` the output is nearly the same.
+```
+root@precise64:/vagrant/advC# uname -a
+Linux precise64 3.2.0-23-generic #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012 x86_64 x86_64 x86_64 GNU/Linux
+```
