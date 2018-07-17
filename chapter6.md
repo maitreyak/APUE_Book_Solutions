@@ -67,7 +67,29 @@ Linux precise64 3.2.0-23-generic #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012 x86
 ```
 # 6.4 
 # Calculate the latest time that can be represented by the time_t data type. After it wraps around, what happens?
-
+```c
+#include <stdio.h>
+#include <time.h>
+int
+main(void){
+    time_t t;
+    printf("size of time_t in bytes %ld\n", sizeof(time_t));
+    return 0;
+}
+```
+To find the data type time_t encapsulates on this machine. We use the ```gcc -E``` option.
+```
+root@precise64:/vagrant/advC# gcc -E time_t.c | grep time_t
+typedef long int __time_t;
+typedef __time_t time_t;
+```
+Notice that time_t infact is a ```signed long``` (on this perticular node).
+Let's run the program and find out the size of ```long```.
+```
+root@precise64:/vagrant/advC# ./a.out
+size of time_t in bytes 8
+```
+The largest positive values that can stored would be ```2^63 - 1```. An overflow would yeild negative values, most modern system detech this.  
 # 6.5
 # Write a program to obtain the current time and print it using strftime, so that it looks like the default output from date(1). Set the TZ environment variable to different values and see what happens.
 ```c
