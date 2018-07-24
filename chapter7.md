@@ -64,6 +64,8 @@ _NSGetArgv() [1] = 'one'
 _NSGetArgv() [2] = 'two'
 _NSGetArgv() [3] = 'three' 
 ```
+# 7.4 
+# Some UNIX system implementations purposely arrange that, when a program is executed, location 0 in the data segment is not accessible. Why?
 
 ```c
 #include <stdio.h>
@@ -81,3 +83,4 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 0x00000000 ptr value
 Segmentation fault
 ```
+Dereferencing NULL which points to data segment location is 0 is considered an runtime error. The firing of the error is enfoced by blocking access to location 0.   
