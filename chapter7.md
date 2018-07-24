@@ -24,3 +24,7 @@ Breakpoint 1, main () at main.c:4
 rax            0xd	13
 ```
 rax register shows 13.
+
+# 7.2 
+# When is the output from the printfs in Figure 7.3 actually output?
+After the exit() call and before the _exit() call.
