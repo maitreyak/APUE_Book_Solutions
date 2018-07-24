@@ -84,3 +84,6 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 Segmentation fault
 ```
 Dereferencing NULL which points to data segment location is 0 is considered an runtime error. The firing of the error is enfoced by blocking access to location 0.   
+
+# 7.5 
+# Use the typedef facility of C to define a new data type Exitfunc for an exit handler. Redo the prototype for atexit using this data type.
