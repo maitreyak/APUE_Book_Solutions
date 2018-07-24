@@ -36,7 +36,7 @@ A portable soloution is not available. However, on MS-DOS(and possibly windows) 
 extern char	**__argv; 		/* Current argument address	*/
 extern int	__argc; 		/* Current argument count	*/
 ```
-Found something similar (online) for the macOS.
+Found something similar [online](http://unixjunkie.blogspot.com/2006/07/access-argc-and-argv-from-anywhere.html) for the macOS.
 ```c
 #include <stdio.h>
 
