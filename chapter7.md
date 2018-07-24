@@ -36,3 +36,31 @@ A portable soloution is not available. However, on MS-DOS(and possibly windows) 
 extern char	**__argv; 		/* Current argument address	*/
 extern int	__argc; 		/* Current argument count	*/
 ```
+Found something similar (online) for the macOS.
+```c
+#include <stdio.h>
+
+extern int *_NSGetArgc(void);
+extern char ***_NSGetArgv(void);
+
+void DoStuff(void) {
+  printf("%s =  %d\n", "_NSGetArgc()", *_NSGetArgc());
+
+  char **argv = *_NSGetArgv();
+  for (int i = 0; argv[i] != NULL; ++i)
+    printf("%s [%d] = '%s'\n", "_NSGetArgv()", i, argv[i]);
+}
+
+int main(void) {
+  DoStuff();
+  return 0;
+}
+```
+```
+$ gcc -std=c99 mac_args.c                                                                                                   $ ./a.out one two three 
+_NSGetArgc() =  4
+_NSGetArgv() [0] = './a.out'
+_NSGetArgv() [1] = 'one'
+_NSGetArgv() [2] = 'two'
+_NSGetArgv() [3] = 'three' 
+```
