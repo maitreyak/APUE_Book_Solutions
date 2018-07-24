@@ -31,3 +31,8 @@ After exit() is called and before the _exit() called. i.e exit_handlers.
 
 # 7.3
 # Is there any way for a function that is called by main to examine the command-line arguments without (a) passing argc and argv as arguments from main to the function or (b) having main copy argc and argv into global variables?
+A portable soloution is not available. However, on MS-DOS(and possibly windows) environments ,we could access global variables to achive the above. 
+```c
+extern char	**__argv; 		/* Current argument address	*/
+extern int	__argc; 		/* Current argument count	*/
+```
