@@ -64,3 +64,20 @@ _NSGetArgv() [1] = 'one'
 _NSGetArgv() [2] = 'two'
 _NSGetArgv() [3] = 'three' 
 ```
+
+```c
+#include <stdio.h>
+int
+main(void) {
+    int val =1;
+    int *p = NULL;
+    printf("0x%08X ptr value\n", p);
+    fflush(stdout);
+    *(p) = val; // should seg fault here
+}
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+0x00000000 ptr value
+Segmentation fault
+```
