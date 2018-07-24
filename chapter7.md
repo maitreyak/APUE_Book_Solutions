@@ -27,7 +27,7 @@ rax register shows 13.
 
 # 7.2 
 # When is the output from the printfs in Figure 7.3 actually output?
-After the exit() called and before the _exit() call.
+After exit() is called and before the _exit() called. i.e exit_handlers.  
 
 # 7.3
 # Is there any way for a function that is called by main to examine the command-line arguments without (a) passing argc and argv as arguments from main to the function or (b) having main copy argc and argv into global variables?
