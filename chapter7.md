@@ -128,3 +128,41 @@ Heaps and Stacks are created at runtime. ```Size command``` examines the static 
 
 # 7.8 
 # In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective text and data sizes. Why?
+
+# 7.10 
+# At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic variable. Is the following code correct?
+```c
+  1 #include <stdio.h>
+  2
+  3 int f1(){
+  4     int val = 0;
+  5     int *ptr = &val;
+  6     if (val == 0) {
+  7         int val = 5;
+  8         ptr = &val;
+  9     }
+ 10     return (*ptr + 1);
+ 11 }
+ 12
+ 13 int
+ 14 main(void) {
+ 15     printf("%d", f1());
+ 16     return 0;
+ 17 }
+```
+
+The program dereferences address that of the deallocated ```if block local``` variable. The operation is dangerous. The program incorrect. 
+```
+(gdb) break stack.c:10
+Breakpoint 1 at 0x40051d: file stack.c, line 10.
+(gdb) run
+Starting program: /vagrant/advC/a.out
+
+Breakpoint 1, f1 () at stack.c:10
+warning: Source file is more recent than executable.
+10		return (*ptr + 1);
+(gdb) info locals
+val = 0
+ptr = 0x7fffffffe47c
+```
+and yet the program outputs 6. Which confirms the dangerous operation.
