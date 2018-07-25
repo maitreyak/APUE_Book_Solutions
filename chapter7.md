@@ -125,3 +125,6 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 # 7.7 
 # In the output from the size command at the end of Section 7.6, why aren’t any sizes given for the heap and the stack?
 Heaps and Stacks are created at runtime. ```Size command``` examines the static binary file.
+
+# 7.8 
+# In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective text and data sizes. Why?
