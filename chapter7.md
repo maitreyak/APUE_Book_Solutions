@@ -122,3 +122,6 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 0 0 0 0 0 0 0 0 0 0
 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000
 ```
+# 7.7 
+# In the output from the size command at the end of Section 7.6, why aren’t any sizes given for the heap and the stack?
+Heaps and Stacks are created at runtime. ```Size command``` examines the static binary file.
