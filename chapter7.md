@@ -132,8 +132,15 @@ Executable contain more than just the text and data segments like the symbol tab
 
 # 7.9
 # In Section 7.7, why does the size of the executable file differ so dramatically when we use shared libraries for such a trivial program?
-Shared libaries are large. By enabling static linking, we include all the libs in the executable. Hence the dramatic differece in size between statically linked and dynamically linked executables.
-
+Shared libaries are large. By enabling static linking, we include all the libs in the executable. Hence the dramatic differece in size between statically linked and dynamically linked executables. ```file``` command gives you the linked details of a binary.
+```
+vagrant@precise64:/vagrant/advC$ gcc --static helloworld.c
+vagrant@precise64:/vagrant/advC$ file a.out
+a.out: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.24, BuildID[sha1]=0xd348976e691af2666b269d5768c81065da642853, not stripped
+vagrant@precise64:/vagrant/advC$ gcc helloworld.c
+vagrant@precise64:/vagrant/advC$ file a.out
+a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x431147a89cb77a58473cb310a19e658d548f7e9e, not stripped
+```
 # 7.10 
 # At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic variable. Is the following code correct?
 ```c 
