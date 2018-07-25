@@ -128,6 +128,11 @@ Heaps and Stacks are created at runtime. ```Size command``` examines the static 
 
 # 7.8 
 # In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective text and data sizes. Why?
+Executable contain more than just the text and data segments like the symbol table/debug information etc.
+
+# 7.9
+# In Section 7.7, why does the size of the executable file differ so dramatically when we use shared libraries for such a trivial program?
+Shared libaries are large. By enabling static linking, we include all the libs in the executable. Hence the dramatic differece in size between statically linked and dynamically linked executables.
 
 # 7.10 
 # At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic variable. Is the following code correct?
@@ -151,7 +156,6 @@ Heaps and Stacks are created at runtime. ```Size command``` examines the static 
  17     return 0;
  18 }
 ```
-
 The program dereferences address that of the deallocated ```if block local``` variable. The operation is dangerous. The program incorrect. 
 ```
 (gdb) break stack.c:10
