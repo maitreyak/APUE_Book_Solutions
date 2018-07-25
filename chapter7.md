@@ -129,6 +129,7 @@ Heaps and Stacks are created at runtime. ```Size command``` examines the static 
 # 7.8 
 # In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective text and data sizes. Why?
 Executable contain more than just the text and data segments like the symbol table/debug information etc.
+**[github issue](https://github.com/maitreyak/APUE_Book_Solutions/issues/3)***
 
 # 7.9
 # In Section 7.7, why does the size of the executable file differ so dramatically when we use shared libraries for such a trivial program?
@@ -141,6 +142,8 @@ vagrant@precise64:/vagrant/advC$ gcc helloworld.c
 vagrant@precise64:/vagrant/advC$ file a.out
 a.out: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x431147a89cb77a58473cb310a19e658d548f7e9e, not stripped
 ```
+**[github issue](https://github.com/maitreyak/APUE_Book_Solutions/issues/4)***
+
 # 7.10 
 # At the end of Section 7.10, we showed how a function can’t return a pointer to an automatic variable. Is the following code correct?
 ```c 
