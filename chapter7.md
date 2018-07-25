@@ -129,7 +129,7 @@ Heaps and Stacks are created at runtime. ```Size command``` examines the static 
 # 7.8 
 # In Section 7.7, the two file sizes (879443 and 8378) don’t equal the sums of their respective text and data sizes. Why?
 Executable contain more than just the text and data segments like the symbol table/debug information etc. 
-```strip``` command help eliminate the symbol table and other part of thr binary. 
+```strip``` command helps eliminate the symbol table and other part of thr binary. 
 **[github issue](https://github.com/maitreyak/APUE_Book_Solutions/issues/3)***
 
 # 7.9
