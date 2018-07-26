@@ -87,7 +87,23 @@ Dereferencing NULL which points to data segment location is 0 is considered an r
 
 # 7.5 
 # Use the typedef facility of C to define a new data type Exitfunc for an exit handler. Redo the prototype for atexit using this data type.
-TODO
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef void Exitfunc(void);
+
+void printme(void) {
+        printf("before you go!\n");
+}
+
+int
+main(void) {
+        Exitfunc *ex = &printme;
+        atexit(ex);
+        return 0;
+}
+```
 # 7.6 
 # If we allocate an array of longs using calloc, is the array initialized to 0? If we allocate an array of pointers using calloc, is the array initialized to null pointers?
 
