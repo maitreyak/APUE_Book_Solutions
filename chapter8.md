@@ -36,3 +36,43 @@ before vfork
 The last printf from the parent does not show up as the child has closed the shared stdout stream. 
 # 8.2 
 # Recall the typical arrangement of memory in Figure 7.6. Because the stack frames corresponding to each function call are usually stored in the stack, and because after a vfork the child runs in the address space of the parent, what happens if the call to vfork is from a function other than main and the child does a return from this function after the vfork? Write a test program to verify this, and draw a picture of what’s happening.
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <error.h>
+
+
+pid_t callVfork(void) {
+    pid_t pid;
+    if( (pid = vfork()) < 0 ) {
+        perror("vfork error");
+        exit(0);
+    } else if (pid == 0){
+        return 0;
+    }
+    return pid;
+}
+
+int globval = 6;
+int
+main (void) {
+    pid_t pid;
+    int var;
+    var = 88;
+    printf("before vfork\n");
+    pid = callVfork();
+    if ( pid == 0 ){
+        printf("Child after vfork funtion return\n");
+    } else {
+        printf("Parent after vfork funtion return\n");
+    }
+    exit(0);
+}
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+before vfork
+Child after vfork funtion return
+Segmentation fault
+```
