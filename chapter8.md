@@ -76,3 +76,4 @@ before vfork
 Child after vfork funtion return
 Segmentation fault
 ```
+vfork behaves unpredictably when return is used. Only _exit and exec are valid  
