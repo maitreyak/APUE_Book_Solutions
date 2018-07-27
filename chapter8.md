@@ -76,4 +76,4 @@ before vfork
 Child after vfork funtion return
 Segmentation fault
 ```
-vfork behaves unpredictably when return is used. Only _exit and exec are valid  
+vfork behaves unpredictably when return is used. We end up with segfaults when parent process attempts to execute. Only _exit and exec are valid for the child process to end its execution. 
