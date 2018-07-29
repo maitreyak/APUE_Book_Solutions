@@ -171,7 +171,10 @@ vagrant@precise64:/vagrant/advC$ abnormal termination, signal number 9
 [1]+  Done                    ./parent_proc
 ```
 # 8.4 
-# When we execute the program in Figure 8.13 one time, as in ```$ ./a.out``` the output is correct. But if we execute the program multiple times, one right after the other, as in ```$ ./a.out ; ./a.out ; ./a.out```
+# When we execute the program in Figure 8.13 one time, as in 
+```$ ./a.out``` 
+# the output is correct. But if we execute the program multiple times, one right after the other, as in 
+```$ ./a.out ; ./a.out ; ./a.out```
 ```
 output from parent
 ooutput from parent
