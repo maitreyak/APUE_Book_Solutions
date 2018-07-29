@@ -77,3 +77,63 @@ Child after vfork funtion return
 Segmentation fault
 ```
 vfork behaves unpredictably when return is used. We end up with segfaults when parent process attempts to execute. Only _exit and exec are valid for the child process to end its execution. 
+# 8.3 
+# Rewrite the program in Figure 8.6 to use waitid instead of wait. Instead of calling pr_exit, determine the equivalent information from the siginfo structure.
+Implmentation using the waitid function. 
+```c
+#include <stdio.h>
+#include <sys/wait.h>
+#include <error.h>
+#include <stdlib.h>
+
+void
+pr_exit (int status) {
+    if (WIFEXITED(status)) {
+        printf("Normal termination %d\n", WEXITSTATUS(status));
+    }
+    else if (WIFSIGNALED(status)){
+        printf("abnormal termination, signal number %d%s\n", WTERMSIG(status),
+            #ifdef WCOREDUMP
+                WCOREDUMP(status)? "Core dump generated":""
+            #else
+                ""
+            #endif
+        );
+    }
+    else if(WIFSTOPPED(status)) {
+        printf("Process stopped %d\n", WSTOPSIG(status));
+    }
+}
+
+int
+main(void) {
+    pid_t pid;
+    siginfo_t siginfo;
+
+    if( (pid = fork()) < 0){
+        perror("fork error");exit(-1);
+    }
+    if(pid == 0){
+        exit(0); //complete the child
+    }
+
+    if( (pid = fork()) < 0){
+        perror("fork error");exit(-1);
+    }
+    if(pid == 0){
+        abort(); //abort!
+    }
+
+    if( (pid = fork()) < 0){
+        perror("fork error");exit(-1);
+    }
+    if(pid == 0){
+        int i = 1/0; //divideByZero
+    }
+    while( waitid(P_ALL, -1, &siginfo, WEXITED | WSTOPPED | WCONTINUED) == 0)  { //this is the parent thread
+        pr_exit(siginfo.si_status);
+        //sleep(2);
+    }
+    return 0;
+}
+```
