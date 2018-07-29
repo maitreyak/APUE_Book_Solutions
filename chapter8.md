@@ -183,3 +183,8 @@ put from parent
 output from child
 utput from child
 ````
+Notice, the ```$ ./a.out ; ./a.out ; ./a.out``` executes the same program three time in serial order. i.e PARENT_PROC_PID_1 then PARENT_PROC_PID_2 and then PARENT_PROC_PID_3. 
+
+The problem is that PARENT_PROC_<ID> forks a child, executes the print notifies its child and terminates. There the child procs and subsequent PARENT_PROCs executes intermetently. Leading to outputs as above.
+
+However, if we switch the order or execution i.e, PARENT_PROC_<ID> waits for its children to execute and then terminates. In this case, no proc (child or parent) executes in the intermitent fashion garenteeing expected output.
