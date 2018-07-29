@@ -82,58 +82,91 @@ vfork behaves unpredictably when return is used. We end up with segfaults when p
 Implmentation using the waitid function. 
 ```c
 #include <stdio.h>
-#include <sys/wait.h>
+#include <sys/wait.h> 
 #include <error.h>
 #include <stdlib.h>
 
 void
-pr_exit (int status) {
-    if (WIFEXITED(status)) {
-        printf("Normal termination %d\n", WEXITSTATUS(status));
-    }
-    else if (WIFSIGNALED(status)){
-        printf("abnormal termination, signal number %d%s\n", WTERMSIG(status),
-            #ifdef WCOREDUMP
-                WCOREDUMP(status)? "Core dump generated":""
-            #else
-                ""
-            #endif
-        );
-    }
-    else if(WIFSTOPPED(status)) {
-        printf("Process stopped %d\n", WSTOPSIG(status));
-    }
+pr_exit	(int status) {
+	if (WIFEXITED(status)) {
+		printf("Normal termination %d\n", WEXITSTATUS(status));
+	}	
+	else if (WIFSIGNALED(status)){
+		printf("abnormal termination, signal number %d%s\n", WTERMSIG(status),
+			#ifdef WCOREDUMP
+			  	WCOREDUMP(status)? "Core dump generated":""
+			#else
+			  	""	
+			#endif
+		);
+	}
+	else if(WIFSTOPPED(status)) {
+		printf("Process stopped %d\n", WSTOPSIG(status));
+	}	
 }
 
 int
 main(void) {
-    pid_t pid;
-    siginfo_t siginfo;
+	pid_t pid;
+	siginfo_t siginfo;
 
-    if( (pid = fork()) < 0){
-        perror("fork error");exit(-1);
-    }
-    if(pid == 0){
-        exit(0); //complete the child
-    }
+	if( (pid = fork()) < 0){
+		perror("fork error");exit(-1);
+	} 
+	if(pid == 0){
+		exit(0); //complete the child <-- child 1
+	} 	
 
-    if( (pid = fork()) < 0){
-        perror("fork error");exit(-1);
-    }
-    if(pid == 0){
-        abort(); //abort!
-    }
+	if( (pid = fork()) < 0){
+		perror("fork error");exit(-1);
+	} 
+	if(pid == 0){
+		abort(); //abort! <--- child 2
+	} 	
 
-    if( (pid = fork()) < 0){
-        perror("fork error");exit(-1);
-    }
-    if(pid == 0){
-        int i = 1/0; //divideByZero
-    }
-    while( waitid(P_ALL, -1, &siginfo, WEXITED | WSTOPPED | WCONTINUED) == 0)  { //this is the parent thread
-        pr_exit(siginfo.si_status);
-        //sleep(2);
-    }
-    return 0;
+	if( (pid = fork()) < 0){
+		perror("fork error");exit(-1);
+	} 
+	if(pid == 0){
+		int i = 1/0; //divideByZero <-- child 3
+	} 	
+	if( (pid = fork()) < 0){
+		perror("fork error");exit(-1);
+	} 
+	if(pid == 0){ // additional child: stop contiue <- child 4
+		setbuf(stdout, NULL);
+		printf("Infinite loop  CHILD  pid %ld\n", (long)getpid());
+		for(;;){
+			sleep(1);
+		}
+	} 	
+	while( waitid(P_ALL, -1, &siginfo, WEXITED | WSTOPPED | WCONTINUED) == 0)  { //this is the parent thread
+		pr_exit(siginfo.si_status);
+		//sleep(2);
+	}
+	return 0;
 }
+```
+```
+vagrant@precise64:/vagrant/advC$ ./parent_proc &
+[1] 3619
+vagrant@precise64:/vagrant/advC$ abnormal termination, signal number 8
+Normal termination 0
+Infinite loop  CHILD  pid 3623
+abnormal termination, signal number 6
+
+vagrant@precise64:/vagrant/advC$ jobs
+[1]+  Running                 ./parent_proc &
+vagrant@precise64:/vagrant/advC$ kill -STOP 3623   #SEND STOP SINGNAL
+vagrant@precise64:/vagrant/advC$ abnormal termination, signal number 19
+
+vagrant@precise64:/vagrant/advC$ kill -CONT 3623   #SEND CONTINUE SIGNAL
+vagrant@precise64:/vagrant/advC$ abnormal termination, signal number 18
+
+vagrant@precise64:/vagrant/advC$ jobs
+[1]+  Running                 ./parent_proc & #Parent proc keeps waiting on child until child its terminated.
+vagrant@precise64:/vagrant/advC$ kill -9 3623 
+vagrant@precise64:/vagrant/advC$ abnormal termination, signal number 9
+
+[1]+  Done                    ./parent_proc
 ```
