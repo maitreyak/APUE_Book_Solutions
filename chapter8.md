@@ -139,10 +139,10 @@ main(void) {
 		for(;;){
 			sleep(1);
 		}
-	} 	
+	}
+	//parent proc to that waits on all its childern.
 	while( waitid(P_ALL, -1, &siginfo, WEXITED | WSTOPPED | WCONTINUED) == 0)  { //this is the parent thread
 		pr_exit(siginfo.si_status);
-		//sleep(2);
 	}
 	return 0;
 }
