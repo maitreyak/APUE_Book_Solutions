@@ -191,6 +191,7 @@ However, if we switch the order or execution i.e, PARENT_PROC_<ID> waits for its
 
 # 8.6 
 # Write a program that creates a zombie, and then call system to execute the ps(1) command to verify that the process is a zombie.
+Using vfork as vfork always lets the child finish. Now the parent does not wait of the child making it [defucnt] a zombie!
 ```c
 #include <stdio.h>
 #include <stdlib.h>
