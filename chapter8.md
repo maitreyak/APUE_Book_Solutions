@@ -188,3 +188,21 @@ Notice, the ```$ ./a.out ; ./a.out ; ./a.out``` executes the same program three 
 The problem is that PARENT_PROC_<ID> forks a child, executes the print notifies its child and terminates. There the child procs and subsequent PARENT_PROCs executes intermetently. Leading to outputs as above.
 
 However, if we switch the order or execution i.e, PARENT_PROC_<ID> waits for its children to execute and then terminates. In this case, no proc (child or parent) executes in the intermitent fashion garenteeing expected output.
+
+# 8.6 
+# Write a program that creates a zombie, and then call system to execute the ps(1) command to verify that the process is a zombie.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+int
+main(void) {
+        char ptr[10];
+        pid_t pid;
+        if((pid=vfork()) == 0) {
+                _exit(0);
+        }
+        sprintf( ptr, "ps -p %ld",(long) pid);
+        system(ptr);
+}
+```
