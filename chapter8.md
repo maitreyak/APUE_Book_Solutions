@@ -197,12 +197,18 @@ However, if we switch the order or execution i.e, PARENT_PROC_<ID> waits for its
 #include <unistd.h>
 int
 main(void) {
-        char ptr[10];
-        pid_t pid;
-        if((pid=vfork()) == 0) {
-                _exit(0);
-        }
-        sprintf( ptr, "ps -p %ld",(long) pid);
-        system(ptr);
+    char ptr[10];
+    pid_t pid;
+    if((pid=vfork()) == 0) {
+        _exit(0);//zombie child
+    }
+    sprintf( ptr, "ps -p %ld",(long) pid);
+    system(ptr);
+    return 0;
 }
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+  PID TTY          TIME CMD
+ 3843 pts/1    00:00:00 a.out <defunct>
 ```
