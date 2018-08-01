@@ -250,3 +250,43 @@ vagrant@precise64:/vagrant/advC$ ./a.out
   PID TTY          TIME CMD
  3843 pts/1    00:00:00 a.out <defunct>
 ```
+# 8.7 
+# We mentioned in Section 8.10 that POSIX.1 requires open directory streams to be closed across an exec. Verify this as follows: call opendir for the root directory, peek at your system’s implementation of the DIR structure, and print the close-on-exec flag. Then open the same directory for reading, and print the close-on-exec flag.
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <dirent.h>
+
+int
+main(void) {
+        DIR *dir;
+        int fd;
+        int flags;
+
+        dir = opendir("/Users/slasher/git_projects/advC");
+
+        if(errno != 0) {
+                perror("open dir problems");
+                exit(-1);
+        }
+
+        fd = dirfd(dir);
+
+        if ( (flags = fcntl(fd, F_GETFL, 0)) < 0 ) {
+                perror("fcntl error");
+                exit(-1);
+        }
+
+        printf("flag value %d and  close on exec flag %d", flags, O_CLOEXEC);
+
+        if( flags & O_CLOEXEC ){
+                printf("close-on-exec is set on DIR\n");
+        }
+        exit(0);
+}
+```
