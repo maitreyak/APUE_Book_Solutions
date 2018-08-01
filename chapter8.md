@@ -262,31 +262,39 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 #include <fcntl.h>
 #include <dirent.h>
 
-int
-main(void) {
-        DIR *dir;
-        int fd;
+void isCloseOnExec(int fd) {
         int flags;
-
-        dir = opendir("/Users/slasher/git_projects/advC");
-
-        if(errno != 0) {
-                perror("open dir problems");
-                exit(-1);
-        }
-
-        fd = dirfd(dir);
-
         if ( (flags = fcntl(fd, F_GETFL, 0)) < 0 ) {
                 perror("fcntl error");
                 exit(-1);
         }
-
-        printf("flag value %d and  close on exec flag %d", flags, O_CLOEXEC);
-
         if( flags & O_CLOEXEC ){
                 printf("close-on-exec is set on DIR\n");
+        }else {
+                printf("close-on-exec is NOT set on DIR\n");
         }
+}
+
+int
+main(void) {
+        DIR *dir; int fd; int flags;
+
+        dir = opendir("/");
+        if(errno != 0) {
+                perror("open dir problems");
+                exit(-1);
+        }
+        fd = dirfd(dir);
+        isCloseOnExec(fd);
+        closedir(dir);
+
+        fd = open("/", O_RDONLY);
+        isCloseOnExec(fd);
         exit(0);
 }
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+close-on-exec is set on DIR
+close-on-exec is NOT set on DIR
 ```
