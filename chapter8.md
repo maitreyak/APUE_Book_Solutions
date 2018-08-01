@@ -189,6 +189,43 @@ The problem is that PARENT_PROC_<ID> forks a child, executes the print notifies 
 
 However, if we switch the order or execution i.e, PARENT_PROC_<ID> waits for its children to execute and then terminates. In this case, no proc (child or parent) executes in the intermitent fashion garenteeing expected output.
 
+# 8.5 
+# In the program shown in Figure 8.20, we call execl, specifying the pathname of the interpreter file. If we called execlp instead, specifying a filename of testinterp, and if the directory /home/sar/bin was a path prefix, what would be printed as argv[2] when the program is run?
+
+```execlp``` looks for the file name in the path prefixes specfied in ```$PATH``` env variable.
+Lets execute the program from 
+```
+vagrant@precise64:~$ pwd
+/home/vagrant
+```
+Lets place the ```testinterp``` interpreter file in ```/vagrant/advC``` directory and add the directory to the ```$PATH``
+```
+vagrant@precise64:~$ echo $PATH
+/usr/lib/jvm/bin::/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin:/vagrant/advC
+```
+Now lets execute the below program 
+```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+int
+main(void) {
+    pid_t pid;
+    if ((pid == fork()) == 0 ){
+        execlp("testinterp", "testinterp", "myarg1", "myarg2" ,(char *)0);
+    }
+    return;
+}
+```
+execlp now looks for testinterp in the path prefixes in the ```$PATH``` and finds it in ```/vagrant/advC/testinterp``` which is arg[2] as expected. 
+```
+vagrant@precise64:~$ ./a.out
+arg[0]: /vagrant/advC/echoargs
+arg[1]: foo
+arg[2]: /vagrant/advC/testinterp
+arg[3]: myarg1
+arg[4]: myarg2
+```
 # 8.6 
 # Write a program that creates a zombie, and then call system to execute the ps(1) command to verify that the process is a zombie.
 Using vfork as vfork always lets the child finish. Now the parent does not wait of the child making it [defucnt] a zombie!
