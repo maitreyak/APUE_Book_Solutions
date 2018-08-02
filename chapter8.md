@@ -315,7 +315,7 @@ Child1 proc pid 2863
 ^Z
 [3]+  Stopped                 ./a.out
 ```
-On inspection of the child1 with close on exec enabled. The root ```\``` dir does not appear. 
+On inspection of the child1 with ```O_CLOEXEC``` enabled. The root ```\``` dir does not appear. 
 ```
 vagrant@precise64:/vagrant/advC$ ll /proc/2863/fd
 total 0
@@ -325,7 +325,7 @@ lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 0 -> /dev/pts/0
 lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 1 -> /dev/pts/0
 lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 2 -> /dev/pts/0
 ```
-On the otherhand, child2 close on exec disabled. We notice that the ```/``` dir is an open desciptor. 
+On the otherhand, child2 ```O_CLOEXEC``` disabled. We notice that the ```/``` dir is an open desciptor. 
 ```
 vagrant@precise64:/vagrant/advC$ ll /proc/2864/fd
 total 0
