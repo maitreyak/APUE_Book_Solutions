@@ -252,6 +252,9 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 ```
 # 8.7 
 # We mentioned in Section 8.10 that POSIX.1 requires open directory streams to be closed across an exec. Verify this as follows: call opendir for the root directory, peek at your system’s implementation of the DIR structure, and print the close-on-exec flag. Then open the same directory for reading, and print the close-on-exec flag.
+
+Confusing at first, the author probably wanted to convey that child processes inherit the parents open file descriptors.
+Unless the the flag ```O_CLOEXEC``` is set on the file descriptor.
 ```c
 #include <stdio.h>
 #include <unistd.h>
