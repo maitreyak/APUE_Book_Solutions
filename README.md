@@ -5,3 +5,4 @@
 ### [chapter 6](https://github.com/maitreyak/APUE_Book_Solutions/blob/master/chapter6.md)
 ### [chapter 7](https://github.com/maitreyak/APUE_Book_Solutions/blob/master/chapter7.md)
 ### [chapter 8](https://github.com/maitreyak/APUE_Book_Solutions/blob/master/chapter8.md)
+### [chapter 9](https://github.com/maitreyak/APUE_Book_Solutions/blob/master/chapter9.md)
