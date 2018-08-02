@@ -278,18 +278,28 @@ void isCloseOnExec(int fd) {
 int
 main(void) {
         DIR *dir; int fd; int flags;
-
+        pid_t pid;
         dir = opendir("/");
         if(errno != 0) {
                 perror("open dir problems");
                 exit(-1);
         }
+
         fd = dirfd(dir);
         isCloseOnExec(fd);
-        closedir(dir);
+
+        if((pid = fork()) == 0){
+            printf("Child1 proc pid %d\n", getpid());
+            execlp("sleep", "sleep", "1000", NULL);
+        }
 
         fd = open("/", O_RDONLY);
         isCloseOnExec(fd);
+        if((pid = fork()) == 0){
+            printf("Child2 proc pid %d\n", getpid());
+            execlp("sleep", "sleep", "1000", (char *)0);
+        }
+        sleep(1000);
         exit(0);
 }
 ```
@@ -297,4 +307,29 @@ main(void) {
 vagrant@precise64:/vagrant/advC$ ./a.out
 close-on-exec is set on DIR
 close-on-exec is NOT set on DIR
+Child2 proc pid 2864
+Child1 proc pid 2863
+^Z
+[3]+  Stopped                 ./a.out
+```
+On inspection of the child1 with close on exec enabled. The root ```\``` dir does not appear. 
+```
+vagrant@precise64:/vagrant/advC$ ll /proc/2863/fd
+total 0
+dr-x------ 2 vagrant vagrant  0 Aug  2 02:41 ./
+dr-xr-xr-x 8 vagrant vagrant  0 Aug  2 02:41 ../
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 0 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 1 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 2 -> /dev/pts/0
+```
+On the otherhand, child2 close on exec disabled. We notice that the ```/``` dir is an open desciptor. 
+```
+vagrant@precise64:/vagrant/advC$ ll /proc/2864/fd
+total 0
+dr-x------ 2 vagrant vagrant  0 Aug  2 02:41 ./
+dr-xr-xr-x 8 vagrant vagrant  0 Aug  2 02:41 ../
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 0 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 1 -> /dev/pts/0
+lrwx------ 1 vagrant vagrant 64 Aug  2 02:41 2 -> /dev/pts/0
+lr-x------ 1 vagrant vagrant 64 Aug  2 02:41 4 -> //
 ```
