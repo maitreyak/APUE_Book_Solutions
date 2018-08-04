@@ -1,4 +1,10 @@
-# 9.2 
+# 9.1
+# Refer back to our discussion of the utmp and wtmp files in Section 6.8. Why are the logout records written by the init process? Is this handled the same way for a network login?
+
+init detects when the login shell dies, but by catching the SIGCHLD signal and records logout activity.
+The network deamon handles the network logins. Eg telnetd as shown in figure 9.9.
+
+# 9.2
 # Write a small program that calls fork and has the child create a new session. Verify that the child becomes a process group leader and that the child no longer has a controlling terminal.
 ```c
 #include <stdio.h>
