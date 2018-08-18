@@ -35,19 +35,23 @@ Implemention using strsignal.
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <error.h>
 
 int
 sig2str(int signo, char *str) {
-    if(strcpy(str , strsignal(signo)) < 0) {
+    if(signo < 0 || signo > NSIG)
         return -1;
-    }
+    strcpy(str , strsignal(signo));
     return 0;
 }
 
 int
 main(void) {
     char buf[100];
-    sig2str(20, buf);
+    if(sig2str(10020, buf) < 0 ){
+        exit(-1);
+    }
     printf("%s\n",buf);
+    exit(0);
 }
 ```
