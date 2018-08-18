@@ -30,3 +30,24 @@ Pause() puts the calling process to sleep and waits for the process to receive a
 
 # 10.2 
 # Implement the sig2str function described in Section 10.22.
+Implemention using strsignal.
+```
+#include <signal.h>
+#include <stdio.h>
+#include <string.h>
+
+int
+sig2str(int signo, char *str) {
+    if(strcpy(str , strsignal(signo)) < 0) {
+        return -1;
+    }
+    return 0;
+}
+
+int
+main(void) {
+    char buf[100];
+    sig2str(20, buf);
+    printf("%s\n",buf);
+}
+```
