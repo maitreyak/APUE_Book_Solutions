@@ -34,6 +34,7 @@ Implemention using strsignal.
 ```
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <error.h>
 
@@ -48,10 +49,14 @@ sig2str(int signo, char *str) {
 int
 main(void) {
     char buf[100];
-    if(sig2str(10020, buf) < 0 ){
+    if(sig2str(20, buf) < 0 ){
         exit(-1);
     }
     printf("%s\n",buf);
     exit(0);
 }
+```
+```
+vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
+Stopped
 ```
