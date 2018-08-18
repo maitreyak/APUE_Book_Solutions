@@ -27,3 +27,6 @@ sig_usr(int signo)		/* argument is signal number */
 }
 ```
 Pause() puts the calling process to sleep and waits for the process to receive a signal. Without the ```for(;;)``` the program only waits for one signal and then terminates.
+
+#10.2 
+#Implement the sig2str function described in Section 10.22.
