@@ -60,3 +60,5 @@ main(void) {
 vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
 Stopped
 ```
+# 10.3 
+# Draw pictures of the stack frames when we run the program from Figure 10.9.
