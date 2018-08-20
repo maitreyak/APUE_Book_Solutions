@@ -101,7 +101,7 @@ main(void) {
     printf("sleep2 done!\n");
 }
 ```
-Using gdb to viszulize the frames. Place a breakpoint at line the has alarm longjmp. 
+Using gdb to viszulize the frames. Place a breakpoint at ```longjmp``` and ```setjmp``` line. 
 ```
 (gdb) bt
 #0  alarmHandler (signo=14) at sigstacks.c:10
@@ -113,7 +113,7 @@ Using gdb to viszulize the frames. Place a breakpoint at line the has alarm long
 #6  0x0000000000400712 in main () at sigstacks.c:35
 ```
 
-And then we place another breakpoint at line ```if(setjmp(env) == 0)```, as we know is the longjmp destination. On running backtrace(bt), we notice the stack has instantly shrunk to just 2 frames.
+At breakpoint in line ```if(setjmp(env) == 0)```, as we know is the longjmp destination. On running backtrace(bt), we notice the stack has instantly shrunk to just 2 frames.
 
 ```(gdb) bt
 #0  sleep2 (secs=5) at sigstacks.c:24
