@@ -1,6 +1,6 @@
 # 10.1 
 # In Figure 10.2, remove the for (;;) statement. What happens and why?
-```
+```c
 #include "apue.h"
 
 static void	sig_usr(int);	/* one handler for both signals */
@@ -31,7 +31,7 @@ Pause() puts the calling process to sleep and waits for the process to receive a
 # 10.2 
 # Implement the sig2str function described in Section 10.22.
 Implemention using strsignal.
-```
+```c
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
