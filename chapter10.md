@@ -121,3 +121,17 @@ At breakpoint in line ```if(setjmp(env) == 0)```, as we know is the longjmp dest
 ```
 Most noticabley, frames related to intSignalHandler are gone among other frames. Therefore, we never see the intHandler ever finish. 
 ``` setjmp``` and ```longjmp``` are risky operations that mess with the process stack and hence must be used with great care.
+# 10.4 
+# In Figure 10.11, we showed a technique that’s often used to set a timeout on an I/O operation using setjmp and longjmp. The following code has also been seen: What else is wrong with this sequence of code?
+```
+signal(SIGALRM, sig_alrm);
+alarm(60);
+if (setjmp(env_alrm) != 0) {     
+	/* handle timeout */      
+	...
+}
+```
+Assuming sig_alrm signal handler function uses ```longjmp``` using the ```jmp_buf env_alrm```. However, based on how process scheduling plays out their is chnace that SIGALRM is invoked even before the ```jmp_buf env_alrm``` in initilized. In that can the signal handler ```longjmp``` attempting to jump using uninitialized ```jmp_buf env_alrm``` will possibly SEGFAULT or worse in the process.
+
+# 10.5
+# Using only a single timer (either alarm or the higher-precision setitimer), provide a set of functions that allows a process to set any number of timers.
