@@ -135,3 +135,51 @@ Assuming sig_alrm signal handler function uses ```longjmp``` using the ```jmp_bu
 
 # 10.5
 # Using only a single timer (either alarm or the higher-precision setitimer), provide a set of functions that allows a process to set any number of timers.
+```C
+/*
+Since we are intrested in SIGNALS in this excercise, implemetation below uses child process to setup multiple alarms rather than maintaining a data structure to keep track alarams. 
+*/
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+/*
+	The OPTIONAL parent SIGALRM handler. Does nothing useful apart from logging the SIGALRM received from the child.
+*/
+void parent_alrm_handler(int signo) {
+	printf("Parent proc caught alrm signal\n");
+	return;
+}
+
+/*
+	The child SIGALRM handler.Replays the SIGALRM back to the parent when it receives it.
+*/
+void child_alrm_handler(int signo){
+	printf("sending kill SIGALRM to the parent %d\n", getppid());
+	kill(getppid(), SIGALRM);
+}
+
+/*
+	Since each proc has single timer. We create child proceses when the req for new alarms is made.
+	Caveat: This goes create zombie process. Handling  the it would be overkill for the current example.
+*/
+void set_alarm(int secs){
+	signal(SIGALRM, parent_alrm_handler);
+	if( fork() == 0 ){
+		signal(SIGALRM, child_alrm_handler);
+		alarm(secs);
+		printf ("setting an alarm\n");
+		pause();
+		exit(0);		
+	}	
+}
+
+int
+main(void) {
+	set_alarm(1); //alarm 1		
+	set_alarm(4); //alarm 2		
+	for(;;)
+		pause();
+	return 0;
+}
+
+```
