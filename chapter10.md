@@ -1,5 +1,4 @@
-# 10.1 
-# In Figure 10.2, remove the for (;;) statement. What happens and why?
+# 10.1 In Figure 10.2, remove the for (;;) statement. What happens and why?
 ```c
 #include "apue.h"
 
@@ -28,8 +27,7 @@ sig_usr(int signo)		/* argument is signal number */
 ```
 Pause() puts the calling process to sleep and waits for the process to receive a signal. Without the ```for(;;)``` the program only waits for one signal and then terminates.
 
-# 10.2 
-# Implement the sig2str function described in Section 10.22.
+# 10.2 Implement the sig2str function described in Section 10.22.
 Implemention using strsignal.
 ```c
 #include <signal.h>
@@ -60,8 +58,7 @@ main(void) {
 vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
 Stopped
 ```
-# 10.3 
-# Draw pictures of the stack frames when we run the program from Figure 10.9.
+# 10.3 Draw pictures of the stack frames when we run the program from Figure 10.9.
 ```c
 #include <stdio.h>
 #include <signal.h>
@@ -121,8 +118,7 @@ At breakpoint in line ```if(setjmp(env) == 0)```, as we know is the longjmp dest
 ```
 Most noticabley, frames related to intSignalHandler are gone among other frames. Therefore, we never see the intHandler ever finish. 
 ``` setjmp``` and ```longjmp``` are risky operations that mess with the process stack and hence must be used with great care.
-# 10.4 
-# In Figure 10.11, we showed a technique that’s often used to set a timeout on an I/O operation using setjmp and longjmp. The following code has also been seen: What else is wrong with this sequence of code?
+# 10.4 In Figure 10.11, we showed a technique that’s often used to set a timeout on an I/O operation using setjmp and longjmp. The following code has also been seen: What else is wrong with this sequence of code?
 ```
 signal(SIGALRM, sig_alrm);
 alarm(60);
@@ -133,8 +129,7 @@ if (setjmp(env_alrm) != 0) {    
 ```
 Assuming sig_alrm signal handler function uses ```longjmp``` using the ```jmp_buf env_alrm```. However, based on how process scheduling plays out their is chnace that SIGALRM is invoked even before the ```jmp_buf env_alrm``` in initilized. In that can the signal handler ```longjmp``` attempting to jump using uninitialized ```jmp_buf env_alrm``` will possibly SEGFAULT or worse in the process.
 
-# 10.5
-# Using only a single timer (either alarm or the higher-precision setitimer), provide a set of functions that allows a process to set any number of timers.
+# 10.5 Using only a single timer (either alarm or the higher-precision setitimer), provide a set of functions that allows a process to set any number of timers.
 ```C
 /*
 Since we are intrested in SIGNALS in this excercise, implemetation below uses child process to setup multiple alarms rather than maintaining a data structure to keep track alarams. 
@@ -260,7 +255,7 @@ main(void){
 	char rbuf[10];
 	char wbuf[10];
 	//init the file with int 0
-	int fd = open("numbrFile", O_CREAT|O_WRONLY|O_TRUNC, 0644);
+	int fd = open("numberFile", O_CREAT|O_WRONLY|O_TRUNC, 0644);
 	//write a plain 0 first.
 	lseek(fd,0,SEEK_SET);
 	write(fd, "0", 1);
@@ -268,7 +263,7 @@ main(void){
 	TELL_WAIT();
 
 	if( (pid = fork()) == 0){
-		fd = open("numbrFile", O_RDWR|O_SYNC, 0644);
+		fd = open("numberFile", O_RDWR|O_SYNC, 0644);
 		while(1) {
 			critical_section("CHILD", fd, rbuf, wbuf);
 			TELL_PARENT(getppid());
@@ -276,7 +271,7 @@ main(void){
 			TELL_WAIT();
 		}			
 	}else{
-		fd = open("numbrFile", O_RDWR|O_SYNC, 0644);
+		fd = open("numberFile", O_RDWR|O_SYNC, 0644);
 		while(1) {
 			WAIT_CHILD();
 			TELL_WAIT();
@@ -287,4 +282,31 @@ main(void){
 	return 0;
 }
 
+```
+Console output
+```
+PARENT put 3936
+CHILD put 3937
+PARENT put 3938
+CHILD put 3939
+PARENT put 3940
+CHILD put 3941
+PARENT put 3942
+CHILD put 3943
+PARENT put 3944
+CHILD put 3945
+PARENT put 3946
+CHILD put 3947
+PARENT put 3948
+CHILD put 3949
+PARENT put 3950
+CHILD put 3951
+PARENT put 3952
+CHILD put 3953
+PARENT put 3954
+CHILD put 3955
+PARENT put 3956
+^C
+vagrant@precise64:/vagrant/git_projects/advC$ cat numberFile
+3956
 ```
