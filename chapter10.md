@@ -262,7 +262,7 @@ main(void){
 	close(fd);
 	TELL_WAIT();
 
-	if( (pid = fork()) == 0){
+	if( (pid = fork()) == 0){ //Child process.
 		fd = open("numberFile", O_RDWR|O_SYNC, 0644);
 		while(1) {
 			critical_section("CHILD", fd, rbuf, wbuf);
@@ -270,7 +270,7 @@ main(void){
 			WAIT_PARENT();
 			TELL_WAIT();
 		}			
-	}else{
+	} else {
 		fd = open("numberFile", O_RDWR|O_SYNC, 0644);
 		while(1) {
 			WAIT_CHILD();
