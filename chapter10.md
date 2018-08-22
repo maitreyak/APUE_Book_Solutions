@@ -183,3 +183,108 @@ main(void) {
 }
 
 ```
+# 10.6 Write the following program to test the parent–child synchronization functions in Figure 10.24. The process creates a file and writes the integer 0 to the file. The process then calls fork, and the parent and child alternate incrementing the counter in the file. Each time the counter is incremented, print which process (parent or child) is doing the increment.
+
+```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+
+static volatile sig_atomic_t sigflag;
+static sigset_t newmask, oldmask, zeromask;
+
+static void
+sig_usr(int signo) {
+	sigflag = 1; 
+}
+
+void
+TELL_WAIT(void) {
+	signal(SIGUSR1, sig_usr);
+	signal(SIGUSR2, sig_usr);
+	sigemptyset(&zeromask);
+	sigemptyset(&newmask);
+	sigaddset(&newmask, SIGUSR1);
+	sigaddset(&newmask, SIGUSR2);
+	sigprocmask(SIG_BLOCK, &newmask, &oldmask);
+}
+
+void
+TELL_PARENT(pid_t pid) {
+	kill(pid, SIGUSR2);
+}
+
+void
+TELL_CHILD(pid_t pid) {
+	kill(pid, SIGUSR1);
+}
+
+void
+WAIT_PARENT(void) {
+	while(sigflag == 0) {
+		sigsuspend(&zeromask);
+	}
+	sigflag = 0;
+	sigprocmask(SIG_SETMASK, &oldmask, NULL);
+}
+
+void
+WAIT_CHILD(void) {
+	while(sigflag == 0) {
+		sigsuspend(&zeromask);
+	}
+	sigflag = 0;
+	sigprocmask(SIG_SETMASK, &oldmask, NULL);
+}
+
+void critical_section(const char* proc, int fd, char *rbuf, char *wbuf ) {
+	int value;
+	memset(rbuf,0,10);
+	memset(wbuf,0,10);
+	lseek(fd,0,SEEK_SET);
+	read(fd,rbuf, 10);	
+	value = atoi(rbuf) + 1;
+	sprintf(wbuf,"%d\0", value);
+	printf("%s put %s\n",proc , wbuf);
+	lseek(fd,0,SEEK_SET);
+	write(fd, wbuf,strlen(wbuf));
+	return;
+}
+
+int
+main(void){
+	pid_t pid;
+	char rbuf[10];
+	char wbuf[10];
+	//init the file with int 0
+	int fd = open("numbrFile", O_CREAT|O_WRONLY|O_TRUNC, 0644);
+	//write a plain 0 first.
+	lseek(fd,0,SEEK_SET);
+	write(fd, "0", 1);
+	close(fd);
+	TELL_WAIT();
+
+	if( (pid = fork()) == 0){
+		fd = open("numbrFile", O_RDWR|O_SYNC, 0644);
+		while(1) {
+			critical_section("CHILD", fd, rbuf, wbuf);
+			TELL_PARENT(getppid());
+			WAIT_PARENT();
+			TELL_WAIT();
+		}			
+	}else{
+		fd = open("numbrFile", O_RDWR|O_SYNC, 0644);
+		while(1) {
+			WAIT_CHILD();
+			TELL_WAIT();
+			critical_section("PARENT", fd, rbuf, wbuf);
+			TELL_CHILD(pid);
+		}
+	}
+	return 0;
+}
+
+```
