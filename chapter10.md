@@ -235,6 +235,9 @@ WAIT_CHILD(void) {
 	sigprocmask(SIG_SETMASK, &oldmask, NULL);
 }
 
+/*
+	The critical section of the program.
+*/
 void critical_section(const char* proc, int fd, char *rbuf, char *wbuf ) {
 	int value;
 	memset(rbuf,0,10);
@@ -249,6 +252,9 @@ void critical_section(const char* proc, int fd, char *rbuf, char *wbuf ) {
 	return;
 }
 
+/*
+	The main driver program.	
+*/
 int
 main(void){
 	pid_t pid;
