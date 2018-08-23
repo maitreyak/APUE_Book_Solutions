@@ -323,4 +323,28 @@ The expecation of the abort function is to get the process to terminate abnormal
 <TODO>
 	
 # 10.9 Rewrite the function in Figure 10.14 to handle all the signals from Figure 10.1. The function should consist of a single loop that iterates once for every signal in the current signal mask (not once for every possible signal).
+```C
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
 
+void pr_mask(int mask){
+    int count = 0;
+    int lsb;
+    while(mask > 0 ) {
+        if((lsb = mask >> 1) == 1){
+            printf("|%s|",strsignal(count));
+        }
+        mask >>= 1;
+        count++;
+    }
+    printf("\n");
+}
+
+
+int
+main(void) {
+    pr_mask(134);
+}
+```
