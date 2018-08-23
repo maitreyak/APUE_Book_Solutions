@@ -318,3 +318,9 @@ vagrant@precise64:/vagrant/git_projects/advC$ cat numberFile
 ```
 # 10.7 In the function shown in Figure 10.25, if the caller catches SIGABRT and returns from the signal handler, why do we go to the trouble of resetting the disposition to its default and call kill the second time, instead of simply calling _exit?
 The expecation of the abort function is to get the process to terminate abnormally. Calling _exit or exit instead will get the process to terminate normally.
+
+# 10.8 Why do you think the siginfo structure (Section 10.14) includes the real user ID, instead of the effective user ID, in the si_uid field?
+<TODO>
+	
+# 10.9 Rewrite the function in Figure 10.14 to handle all the signals from Figure 10.1. The function should consist of a single loop that iterates once for every signal in the current signal mask (not once for every possible signal).
+
