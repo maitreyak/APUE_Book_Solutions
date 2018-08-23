@@ -316,3 +316,5 @@ PARENT put 3956
 vagrant@precise64:/vagrant/git_projects/advC$ cat numberFile
 3956
 ```
+# 10.7 In the function shown in Figure 10.25, if the caller catches SIGABRT and returns from the signal handler, why do we go to the trouble of resetting the disposition to its default and call kill the second time, instead of simply calling _exit?
+The expecation of the abort function is to get the process to terminate abnormally. Calling _exit or exit instead will get the process to terminate normally.
