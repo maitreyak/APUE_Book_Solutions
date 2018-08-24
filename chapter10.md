@@ -359,6 +359,9 @@ main(void) {
 ```
 |Aborted||User defined signal 1||User defined signal 2||I/O possible|
 ```
+# 10.10 Write a program that calls sleep(60) in an infinite loop. Every five times through the loop (every 5 minutes), fetch the current time of day and print the tm_sec field. Run the program overnight and explain the results. How would a program such as the cron daemon, which runs every minute on the minute, handle this situation?
+Since there is inherit delay in dealing with pending signals, long running processes with sleep(60) do drift. Cron handles this by syncing with the time drift, by setting the alarm slightly on the next run if the previous run incured a time drift.   
+
 # 10.12 Write a program that calls fwrite with a large buffer (about one gigabyte). Before calling fwrite, call alarm to schedule a signal in 1 second. In your signal handler, print that the signal was caught and return. Does the call to fwrite complete? What’s happening?
 ```C
 #include <stdio.h>
