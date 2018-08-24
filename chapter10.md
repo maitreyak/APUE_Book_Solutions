@@ -359,3 +359,34 @@ main(void) {
 ```
 |Aborted||User defined signal 1||User defined signal 2||I/O possible|
 ```
+# 10.12 Write a program that calls fwrite with a large buffer (about one gigabyte). Before calling fwrite, call alarm to schedule a signal in 1 second. In your signal handler, print that the signal was caught and return. Does the call to fwrite complete? What’s happening?
+```C
+#include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <errno.h>
+
+void sigHandler(int signo) {
+    printf("Caught Alarm\n");
+}
+
+int main () {
+    FILE *fp;
+    int BYTES = 1000000000;
+    void *ptr = malloc(BYTES);
+    fp = fopen( "file.txt" , "w" );
+    signal(SIGALRM, sigHandler);
+    alarm(1);
+    if(fwrite(ptr , 1 , BYTES , fp ) != BYTES) {
+        fprintf(stderr,"fwrite was interupted");
+        exit(errno);
+    }
+    printf("fwrite completed successfully");
+    free(ptr);
+    fclose(fp);
+    return(0);
+}
+```
+On linux 3.2, the fwrite completes without getting interupted, emperically. However, no signals are blocked during the process and instead /prod/<pid>/status for the running process shows signals in pending state while the read occurs.
+
+Therefore, the behaviour of fwrite and signals seems non-portable.
