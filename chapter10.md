@@ -320,7 +320,7 @@ vagrant@precise64:/vagrant/git_projects/advC$ cat numberFile
 The expecation of the abort function is to get the process to terminate abnormally. Calling _exit or exit instead will get the process to terminate normally.
 
 # 10.8 Why do you think the siginfo structure (Section 10.14) includes the real user ID, instead of the effective user ID, in the si_uid field?
-<TODO>
+The effective id is either root or the owner of the signal receiving process, which is poor information of the signal generating process. On the other hand, real user Id of signal generating process is far more useful info.
 	
 # 10.9 Rewrite the function in Figure 10.14 to handle all the signals from Figure 10.1. The function should consist of a single loop that iterates once for every signal in the current signal mask (not once for every possible signal).
 ```C
