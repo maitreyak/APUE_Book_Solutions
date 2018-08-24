@@ -388,5 +388,29 @@ int main () {
 }
 ```
 On linux 3.2, the fwrite completes without getting interupted, emperically. However, no signals are blocked during the process and instead /prod/<pid>/status for the running process show the signal is in pending state while the write occurs.
+```
+vagrant@precise64:/vagrant/git_projects/advC$ cat /proc/`pgrep a.out`/status
+Name:	a.out
+State:	R (running)
+Tgid:	4556
+Pid:	4556
 
-Therefore, the behaviour of fwrite and signals seems non-portable.
+Threads:	1
+SigQ:	1/2782
+SigPnd:	0000000000000000
+ShdPnd:	0000000000002000
+SigBlk:	0000000000000000
+SigIgn:	0000000000000000
+SigCgt:	0000000000002000
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	ffffffffffffffff
+```
+```
+vagrant@precise64:/vagrant/git_projects/advC$ a.out &
+Caught Alarm
+fwrite completed successfully
+[2]-  Done                    ./a.out
+```
+Therefore, the behaviour of fwrite and signals appears implmentation specfic.
