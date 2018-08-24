@@ -328,16 +328,18 @@ The expecation of the abort function is to get the process to terminate abnormal
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-
-void pr_mask(int mask){
-    int count = 0;
-    int lsb;
+/*
+    Linux Non portable implemtation of based on /usr/include/x86_64-linux-gnu/bits/sigset.h
+    The function examines the first 64 bits of the sigset mask and prints the signals.
+*/
+void pr_mask(sigset_t sigmask){
+    unsigned long int mask =  sigmask.__val[0];
+    int count = 1;
     while(mask > 0 ) {
-        if((lsb = mask >> 1) == 1){
+        count++;
+        if((mask >>= 1) % 2 == 1 ){
             printf("|%s|",strsignal(count));
         }
-        mask >>= 1;
-        count++;
     }
     printf("\n");
 }
@@ -345,6 +347,15 @@ void pr_mask(int mask){
 
 int
 main(void) {
-    pr_mask(134);
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGABRT);
+    sigaddset(&mask, SIGUSR1);
+    sigaddset(&mask, SIGUSR2);
+    sigaddset(&mask, SIGPOLL);
+    pr_mask(mask);
 }
+```
+```
+|Aborted||User defined signal 1||User defined signal 2||I/O possible|
 ```
