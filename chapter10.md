@@ -387,6 +387,6 @@ int main () {
     return(0);
 }
 ```
-On linux 3.2, the fwrite completes without getting interupted, emperically. However, no signals are blocked during the process and instead /prod/<pid>/status for the running process shows signals in pending state while the read occurs.
+On linux 3.2, the fwrite completes without getting interupted, emperically. However, no signals are blocked during the process and instead /prod/<pid>/status for the running process show the signal is in pending state while the write occurs.
 
 Therefore, the behaviour of fwrite and signals seems non-portable.
