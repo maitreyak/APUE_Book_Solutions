@@ -362,6 +362,9 @@ main(void) {
 # 10.10 Write a program that calls sleep(60) in an infinite loop. Every five times through the loop (every 5 minutes), fetch the current time of day and print the tm_sec field. Run the program overnight and explain the results. How would a program such as the cron daemon, which runs every minute on the minute, handle this situation?
 Since there is inherit delay in dealing with pending signals, long running processes with call such as ```sleep(60)``` drift. Cron handles by setting the alarm slightly earlier ex: ```sleep(59)``` on the next run, if the previous run incured a time drift.   
 
+# 10.11 Modify Figure 3.5 as follows: (a) change BUFFSIZE to 100; (b) catch the SIGXFSZ signal using the signal_intr function, printing a message when it’s caught, and returning from the signal handler; and (c) print the return value from write if the requested number of bytes wasn’t written. Modify the soft RLIMIT_FSIZE resource limit (Section 7.11) to 1,024 bytes and run your new program, copying a file that is larger than 1,024 bytes. (Try to set the soft resource limit from your shell. If you can’t do this from your shell, call setrlimit directly from the program.) Run this program on the different systems that you have access to. What happens and why?
+Under Linux 3.2.0, Mac OS X 10.6.8, and Solaris 10, the signal handler for SIGXFSZ is never called. But write returns a count of 24 as soon as the file’s size reaches 1,024 bytes.If we attempt an additional write at the current file offset (the end of the file), we will receive SIGXFSZ and write will fail, returning –1 with errno set to EFBIG.
+
 # 10.12 Write a program that calls fwrite with a large buffer (about one gigabyte). Before calling fwrite, call alarm to schedule a signal in 1 second. In your signal handler, print that the signal was caught and return. Does the call to fwrite complete? What’s happening?
 ```C
 #include <stdio.h>
