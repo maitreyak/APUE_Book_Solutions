@@ -45,3 +45,5 @@ main(void) {
     return 0;
 }
 ```
+# 14.6 Can you implement the functions TELL_WAIT, TELL_PARENT, TELL_CHILD, WAIT_PARENT, and WAIT_CHILD from Figure 10.24 using advisory record locking instead of signals? If so, code and test your implementation.
+
