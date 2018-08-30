@@ -25,3 +25,23 @@ a.out   6503 vagrant    3u  REG   0,20        0  902 lock.lock
 <TODO>
   
 # 14.5 Implement the function sleep_us, which is similar to sleep, but waits for a specified number of microseconds. Use either select or poll. Compare this function to the BSD usleep function.
+sleep using select.
+```
+#include <stdio.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <stdlib.h>
+
+void select_sleep(long int usec) {
+    struct timeval t;
+    t.tv_sec = 0;
+    t.tv_usec = usec;
+    select(0, NULL, NULL, NULL, &t);
+}
+
+int
+main(void) {
+    select_sleep(10000000);
+    return 0;
+}
+```
