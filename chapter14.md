@@ -117,3 +117,4 @@ vagrant@precise64:/vagrant/git_projects/advC$
 parent critical section
 child critical section
 ```
+# 14.7 Determine the capacity of a pipe using nonblocking writes. Compare this value with the value of PIPE_BUF from Chapter 2.
