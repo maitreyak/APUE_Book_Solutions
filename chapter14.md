@@ -186,3 +186,5 @@ readcount 65536 writecount 65536
 readcount 16960 writecount 16960
 ```
 The max number size of read or writes in non-blocking mode is ```65536``` which also happens to be the size of ```PIPE_BUF``` on a linux 3.2 system. 
+
+# 14.8 Rewrite the program in Figure 14.21 to make it a filter: read from the standard input and write to the standard output, but use the asynchronous I/O interfaces. What must you change to make it work properly? Keep in mind that you should get the same results whether the standard output is attached to a terminal, a pipe, or a regular file.
