@@ -34,8 +34,8 @@ sleep using select.
 
 void select_sleep(long int usec) {
     struct timeval t;
-    t.tv_sec = 0;
-    t.tv_usec = usec;
+    t.tv_sec = usec/1000000;
+    t.tv_usec = usec%1000000;
     select(0, NULL, NULL, NULL, &t);
 }
 
