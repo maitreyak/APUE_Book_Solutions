@@ -46,4 +46,74 @@ main(void) {
 }
 ```
 # 14.6 Can you implement the functions TELL_WAIT, TELL_PARENT, TELL_CHILD, WAIT_PARENT, and WAIT_CHILD from Figure 10.24 using advisory record locking instead of signals? If so, code and test your implementation.
+The aneswer is ```NO```, we cannot use locks to emulate the program written using signals.
+The below program tries to execute the ```parent critical section``` before the ```child critical section```, however, the required inital conditions, where parent proc holds byte 0 lock and child proc holds byte 1 lock cannot be garenteed. 
+i.e The fact that forked child has to complete with the parent to obtain its byte-1 lock, which is a inital condition, marks the failure of the alorithm.
 
+```C
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+static int lockfd;
+
+int
+lock_reg(int fd, int cmd, int type, off_t offset, int whence, off_t len) {
+    struct flock lock;
+    lock.l_type =  type;
+    lock.l_start = offset;
+    lock.l_whence = whence;
+    lock.l_len = len;
+    return fcntl(fd, cmd, &lock);
+}
+
+void TELL_CHILD() {
+    //get parent lock;
+    lock_reg(lockfd, F_SETLKW, F_UNLCK, 0,SEEK_CUR,1);
+}
+void TELL_PARENT() {
+    //get parent lock;
+    lock_reg(lockfd, F_SETLKW, F_UNLCK, 1,SEEK_CUR,1);
+}
+
+void WAIT_PARENT() {
+    //get parent lock;
+    lock_reg(lockfd, F_SETLKW, F_WRLCK, 0,SEEK_CUR,1);
+}
+
+void WAIT_CHILD() {
+    //get childlock;
+    lock_reg(lockfd, F_SETLKW, F_WRLCK, 1,SEEK_CUR,1);
+}
+
+int
+main(void) {
+    lockfd = open("lock.lock", O_WRONLY| O_TRUNC|O_CREAT|O_SYNC, 0666);
+    write(lockfd, "01",2);
+    //byte 0 is for the parent
+    lock_reg(lockfd, F_SETLKW, F_WRLCK, 0,SEEK_CUR,1);
+    if(fork() == 0) {
+        //byte 1 is for the child
+        lock_reg(lockfd, F_SETLKW, F_WRLCK, 1,SEEK_CUR,1);
+        WAIT_PARENT();
+        fprintf(stderr, "child critical section\n");
+        TELL_PARENT();
+    }else {
+        /*
+          THIS IS WHERE THE PROGRAM FAILS. PARENT SLEEP IS INSERTED HERE TO GIVE THE CHILD A CHANCE TO OBTAIN ITS CHILD LOCK.
+          ELSE, THE PARENT CAN GET HOLD BOTH LOCKS AND DEADLOCK THE PROGRAM. DEADLOCKS CAN STILL OCCUR DISPITE THE SLEEP.
+        */
+        sleep(2);  
+        fprintf(stderr, "parent critical section\n");
+        TELL_CHILD();
+        WAIT_CHILD();
+    }
+    return 0;
+}
+```
+```
+vagrant@precise64:/vagrant/git_projects/advC$ 
+parent critical section
+child critical section
+```
