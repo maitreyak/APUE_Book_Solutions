@@ -48,7 +48,7 @@ main(void) {
 # 14.6 Can you implement the functions TELL_WAIT, TELL_PARENT, TELL_CHILD, WAIT_PARENT, and WAIT_CHILD from Figure 10.24 using advisory record locking instead of signals? If so, code and test your implementation.
 The aneswer is ```NO```, we cannot use locks to emulate the program written using signals.
 The below program tries to execute the ```parent critical section``` before the ```child critical section```, however, the required inital conditions, where parent proc holds byte 0 lock and child proc holds byte 1 lock cannot be garenteed. 
-i.e The fact that forked child has to complete with the parent to obtain its byte-1 lock, which is a inital condition, marks the failure of the alorithm.
+The problem is that forked child has to compete with the parent to obtain the byte-1 lock, which is a inital condition, marks the failure of the alorithm.
 
 ```C
 #include <stdio.h>
