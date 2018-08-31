@@ -118,3 +118,70 @@ parent critical section
 child critical section
 ```
 # 14.7 Determine the capacity of a pipe using nonblocking writes. Compare this value with the value of PIPE_BUF from Chapter 2.
+```C
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+int
+main(void) {
+    int PIPESIZE =1000000; //approx 1MB of bytes
+    
+    //Allocate write and read buffers.
+    char *writeptr = (char *)malloc(PIPESIZE); 
+    char *readptr = (char *)malloc(PIPESIZE);
+    
+    int rc,wc;
+    int rz = PIPESIZE;
+    int wz = PIPESIZE;
+    
+    //pipe file desp. p[0] for reading and p[1] for writing.
+    int p[2];
+    
+    //Setup the pipe
+    if(pipe(p) < 0 ) {
+        perror("");
+        exit(-1);
+    }
+    fcntl(p[0], F_SETFL, O_NONBLOCK);
+    fcntl(p[1], F_SETFL, O_NONBLOCK);
+    while(1){
+        if(wz > 0) {
+            wc = write(p[1], writeptr, wz);
+            writeptr += wc;
+            wz-=wc;
+        }
+        if(rz > 0) {
+            rc = read(p[0], readptr, rz);
+            readptr+= rc;
+            rz-=rc;
+        }
+        fprintf(stderr,"readcount %d writecount %d\n", rc, wc);
+        if(wz<=0 && rz<=0)
+            break;
+             }
+    free(writeptr - PIPESIZE);
+    free(readptr - PIPESIZE);
+    return 0;
+}
+```
+```
+vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 65536 writecount 65536
+readcount 16960 writecount 16960
+```
+The max number size of read or writes in non-blocking mode is ```65536``` which also happens to be the size of ```PIPE_BUF``` on a linux 3.2 system. 
