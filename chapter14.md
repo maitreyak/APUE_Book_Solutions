@@ -118,6 +118,7 @@ parent critical section
 child critical section
 ```
 # 14.7 Determine the capacity of a pipe using nonblocking writes. Compare this value with the value of PIPE_BUF from Chapter 2.
+We try to ascetain the value of the pipe buffer by transfering a large buffer of bytes in non blocking mode. The max bytes written or read at single time gives is the value of PIPE_BUF
 ```C
 #include <stdio.h>
 #include <errno.h>
