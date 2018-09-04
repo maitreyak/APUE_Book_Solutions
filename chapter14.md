@@ -323,3 +323,4 @@ vagrant@precise64:/vagrant/git_projects/advC$ ll /etc/services temp.temp
 -rw-r--r-- 1 root    root    19281 Feb 13  2012 /etc/services
 -rw-r--r-- 1 vagrant vagrant 19281 Sep  4 21:42 temp.temp
 ```
+# 14.9 Recall Figure 14.23. Determine the break-even point on your system where using writev is faster than copying the data yourself and using a single write.
