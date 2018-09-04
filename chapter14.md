@@ -188,3 +188,138 @@ readcount 16960 writecount 16960
 The max number size of read or writes in non-blocking mode is ```65536``` which also happens to be the size of ```PIPE_BUF``` on a linux 3.2 system. 
 
 # 14.8 Rewrite the program in Figure 14.21 to make it a filter: read from the standard input and write to the standard output, but use the asynchronous I/O interfaces. What must you change to make it work properly? Keep in mind that you should get the same results whether the standard output is attached to a terminal, a pipe, or a regular file.
+
+File sizes are not relevent when we deal with Pipes or streams. Instead of using fstat and relying on the file size. We use a flag that turned off the momnet we detect 0 bytes on the input stream. This gives the program a generic way of handleing stream, files or pipes.
+```C
+#include <aio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <errno.h>
+#include <unistd.h>
+
+#define BSZ 100  //Reduced the buffer size to demo more aync operations.
+#define NBUF 8
+
+enum rwop {
+	UNUSED = 0,
+	READ_PENDING = 1,
+	WRITE_PENDING = 2
+};
+
+struct buf {
+	enum rwop rwop;
+	struct aiocb aiocb;
+	unsigned char data[BSZ];
+};
+
+struct buf bufs[NBUF];
+
+int
+main(int argc, char *argv[]) {
+	if(argc< 3) {
+		fprintf(stderr, "Not enought args\n");
+	}
+	int ifd, ofd, i, n, err, off=0, numops = 0 ; 
+	/*
+		File sizes are not relevent when we deal with Pipes or streams.
+		Instead of using fstat and relying on the file size. We use a flag that turned off the momnet we detect 0 bytes
+		on the input stream. This gives the program a generic way of handleing stream, files or pipes.
+	*/
+	int ALLOW_READS = 1;
+					
+	ifd = open(argv[1], O_RDONLY);
+	ofd = open(argv[2], O_RDWR|O_CREAT|O_TRUNC, 0666);
+	
+	//ifd = STDIN_FILENO;
+	//ofd = STDOUT_FILENO;
+	
+	struct aiocb const *aiolist[NBUF];
+
+	for(i=0; i < NBUF; i++) {
+		bufs[i].aiocb.aio_buf = bufs[i].data;
+		bufs[i].rwop = UNUSED;
+		bufs[i].aiocb.aio_sigevent.sigev_notify = SIGEV_NONE;
+		aiolist[i]= NULL;
+	}
+
+	for (;;) {
+		for (i=0 ; i< NBUF; i++) {
+			switch(bufs[i].rwop){
+				case UNUSED:
+					if(ALLOW_READS) { 
+						bufs[i].rwop = READ_PENDING;
+						bufs[i].aiocb.aio_fildes = ifd;
+						bufs[i].aiocb.aio_offset = off;
+						bufs[i].aiocb.aio_nbytes = BSZ;
+						off += BSZ;
+						aio_read(&bufs[i].aiocb);
+						aiolist[i] = &bufs[i].aiocb;
+						numops++;
+					}
+					break;			
+
+				case READ_PENDING:
+					if ((err = aio_error(&bufs[i].aiocb)) == EINPROGRESS ) {
+						continue;
+					} 
+					if ((n = aio_return(&bufs[i].aiocb)) < 0) {
+						perror("read error");
+						exit(-1);
+					}
+					if(n == 0) {
+						bufs[i].rwop = UNUSED;
+						ALLOW_READS = 0;
+						numops--;
+						break;
+					}
+					/*
+						ROT13 transform funtion goes here. Not implemented due to trivial nature of functionlity.
+						Doing a direct copy instead.
+					*/
+					bufs[i].rwop = WRITE_PENDING;
+					bufs[i].aiocb.aio_fildes = ofd;
+					bufs[i].aiocb.aio_nbytes = n;
+					if(aio_write(&bufs[i].aiocb) < 0) {
+						perror("write error\n");
+						exit(-1);
+					}
+					break;
+				
+				case WRITE_PENDING:
+					if ((err = aio_error(&bufs[i].aiocb)) == EINPROGRESS ) {
+						continue;
+					} 
+					if ((n = aio_return(&bufs[i].aiocb)) < 0) {
+						perror("read error");
+						exit(-1);
+					}
+					bufs[i].rwop = UNUSED;
+					aiolist[i] = &bufs[i].aiocb;
+					numops--;
+					break;
+			}
+		}			
+
+		if(ALLOW_READS == 0 && numops == 0) {
+			//we are done with all the async operations we triggered
+			break;
+		}else {
+			//wait for all the operations on the list to complete
+			aio_suspend(aiolist, NBUF, NULL);
+		}
+	}
+	//wait till all the writes complete before exiting.
+	bufs[0].aiocb.aio_fildes = ofd;
+	aio_fsync(O_SYNC, &bufs[0].aiocb);
+	return 0;
+}
+```
+Notice with the new implmentation the bytes copied is equal. Verifying the program.
+```
+vagrant@precise64:/vagrant/git_projects/advC$ gcc -g async_filter.c -lrt
+vagrant@precise64:/vagrant/git_projects/advC$ ./a.out /etc/services temp.temp 2>err.err
+vagrant@precise64:/vagrant/git_projects/advC$ ll /etc/services temp.temp
+-rw-r--r-- 1 root    root    19281 Feb 13  2012 /etc/services
+-rw-r--r-- 1 vagrant vagrant 19281 Sep  4 21:42 temp.temp
+```
