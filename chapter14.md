@@ -25,8 +25,40 @@ a.out   6503 vagrant    3u  REG   0,20        0  902 lock.lock
 <TODO>
 
 # 14.3 The system headers usually have a built-in limit on the maximum number of descriptors that the fd_set data type can handle. Assume that we need to increase this limit to handle up to 2,048 descriptors. How can we do this?
-<TODO>
+fd_set is defined in ``<sys/select.h>``` as below
+```C
+/* fd_set for select and pselect.  */
+typedef struct
+  {
+    /* XPG4.2 requires this member name.  Otherwise avoid the name
+       from the global namespace.  */
+#ifdef __USE_XOPEN
+    __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
+# define __FDS_BITS(set) ((set)->fds_bits)
+#else
+    __fd_mask __fds_bits[__FD_SETSIZE / __NFDBITS];
+# define __FDS_BITS(set) ((set)->__fds_bits)
+#endif
+  } fd_set;
+```
 
+Based on the above to increase the fd capacity of select/pselect, we'd had to refine the ```__FD_SETSIZE```
+
+```C
+#include <stdio.h>
+#undef __FD_SETSIZE
+#define __FD_SETSIZE 2048
+#include <sys/select.h>
+int
+main(void) {
+    printf("fd_set %d size\n", (int)sizeof(fd_set) * 8);
+    return 0;
+}
+```
+```
+vagrant@precise64:/vagrant/advC$ ./a.out
+fd_set 2048 size
+```
 # 14.4 Compare the functions provided for signal sets (Section 10.11) and the fd_set descriptor sets. Also compare the implementation of the two on your system.
 <TODO>
 
