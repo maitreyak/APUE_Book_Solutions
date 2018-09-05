@@ -22,7 +22,7 @@ a.out   6502 vagrant    3u   REG   0,20        0  902 lock.lock
 a.out   6503 vagrant    3u  REG   0,20        0  902 lock.lock
 ```
 # 14.2 Take a look at your system’s headers and examine the implementation of select and the four FD_ macros.
-Nothing to solve here more of research excercise.
+Nothing to solve here. More of a research excercise.
 # 14.3 The system headers usually have a built-in limit on the maximum number of descriptors that the fd_set data type can handle. Assume that we need to increase this limit to handle up to 2,048 descriptors. How can we do this?
 fd_set is defined in ``<sys/select.h>``` as below
 ```C
@@ -59,7 +59,7 @@ vagrant@precise64:/vagrant/advC$ ./a.out
 fd_set 2048 size
 ```
 # 14.4 Compare the functions provided for signal sets (Section 10.11) and the fd_set descriptor sets. Also compare the implementation of the two on your system.
-Nothing to solve here more of research excercise.
+Nothing to solve here. More of a research excercise.
 
 # 14.5 Implement the function sleep_us, which is similar to sleep, but waits for a specified number of microseconds. Use either select or poll. Compare this function to the BSD usleep function.
 sleep using select.
