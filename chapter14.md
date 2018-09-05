@@ -324,3 +324,77 @@ vagrant@precise64:/vagrant/git_projects/advC$ ll /etc/services temp.temp
 -rw-r--r-- 1 vagrant vagrant 19281 Sep  4 21:42 temp.temp
 ```
 # 14.9 Recall Figure 14.23. Determine the break-even point on your system where using writev is faster than copying the data yourself and using a single write.
+The can be used to demonstrate that writev can perform better when compared to single writes. 
+
+```C
+#include <time.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/uio.h>
+#include <stdlib.h>
+
+#define VECTOR_COUNT 2024
+#define VSIZE 4024
+void timespec_diff(struct timespec *start, struct timespec *stop,
+                   struct timespec *result)
+{
+    if ((stop->tv_nsec - start->tv_nsec) < 0) {
+        result->tv_sec = stop->tv_sec - start->tv_sec - 1;
+        result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
+    } else {
+        result->tv_sec = stop->tv_sec - start->tv_sec;
+        result->tv_nsec = stop->tv_nsec - start->tv_nsec;
+    }
+    return;
+}
+
+
+int
+main(void) {
+	struct iovec vectors[VECTOR_COUNT];
+	struct timespec start, end, result;
+	int i =0;
+	for (i=0 ; i<VECTOR_COUNT; i++) {
+		vectors[i].iov_base = malloc(VSIZE);
+		vectors[i].iov_len = VSIZE;
+		memset(vectors[i].iov_base, "a" ,VSIZE);
+	}
+	int fdout = open("temp.temp", O_CREAT|O_WRONLY|O_TRUNC);
+	int fdout1 = open("temp1.temp", O_CREAT|O_WRONLY|O_TRUNC);
+
+	clock_gettime(CLOCK_REALTIME, &start);
+	writev(fdout, vectors, VECTOR_COUNT);
+	clock_gettime(CLOCK_REALTIME, &end);
+	timespec_diff(&start, &end, &result);
+	printf("Real time: Mutiple buffer writes: writev COUNT %d SIZE %d: %lld.%.9ld\n", 
+				VECTOR_COUNT, VSIZE,(long long)result.tv_sec, result.tv_nsec);
+
+	void *ptr = malloc(VECTOR_COUNT*VSIZE);
+	memset(ptr,"a" ,VECTOR_COUNT*VSIZE);
+
+	clock_gettime(CLOCK_REALTIME, &start);
+	write(fdout1,ptr,VECTOR_COUNT*VSIZE);
+	clock_gettime(CLOCK_REALTIME, &end);
+	timespec_diff(&start, &end, &result);
+
+	printf("Real time: Single buffer of size %d write: %lld.%.9ld\n", 
+				VECTOR_COUNT * VSIZE, (long long)result.tv_sec, result.tv_nsec);
+	return 0;
+}
+```
+```
+vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
+Real time: Mutiple buffer writes: writev COUNT 1024 SIZE 4024: 0.173320540
+Real time: Single buffer of size 4120576 write: 0.045053265	
+```
+When the single buffer size is increses, a single write does worse. 
+```writev``` does better , when we equivalently increase the number buffers to match the single large buffer.
+```
+vagrant@precise64:/vagrant/git_projects/advC$ ./a.out
+Real time: Mutiple buffer writes: writev COUNT 2024 SIZE 4024: 0.000010054
+Real time: Single buffer of size 8144576 write: 0.089522168
+```
