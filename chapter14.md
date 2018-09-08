@@ -22,7 +22,8 @@ a.out   6502 vagrant    3u   REG   0,20        0  902 lock.lock
 a.out   6503 vagrant    3u  REG   0,20        0  902 lock.lock
 ```
 # 14.2 Take a look at your system’s headers and examine the implementation of select and the four FD_ macros.
-Nothing to solve here. More of a research excercise.
+Select and Poll system call need support from the underlying device driver. The calling process is put to sleep and is awaked by the OS scheudler using the underlying wait_queue OS implemtation. True understanding of the poll & select system calls on only be achived by understanding linux device drivers. See http://www.xml.com/ldd/chapter/book/ch05.html#t3 
+
 # 14.3 The system headers usually have a built-in limit on the maximum number of descriptors that the fd_set data type can handle. Assume that we need to increase this limit to handle up to 2,048 descriptors. How can we do this?
 fd_set is defined in ``<sys/select.h>``` as below
 ```C
