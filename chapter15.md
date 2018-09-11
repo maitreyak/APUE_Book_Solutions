@@ -1,1 +1,46 @@
-15.1 In the program shown in Figure 15.6, remove the close right before the waitpid at the end of the parent code. Explain what happens.
+# 15.1 In the program shown in Figure 15.6, remove the close right before the waitpid at the end of the parent code. Explain what happens.
+Below is the working but condenced verison of the program that in Fig 15.6
+```c 
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
+#define DEF_PAGER "/bin/more"
+#define MAXLINE 4096
+
+int
+main(int argc, char *argv[]) {
+    int fd[2];
+    int f1  = open(argv[1], O_RDONLY);
+    char buf[MAXLINE];
+    pid_t pid;
+    int count;
+    if (pipe(fd) > 0) {
+        perror("Pipe error");
+        exit(-1);
+    }
+    if((pid = fork()) > 0) {
+        //parent proc
+        close(fd[0]);
+        while((count  = read(f1, buf, MAXLINE)) > 0) {
+            write(fd[1], buf, count);
+        }
+        //close(fd[1]); commenting out the close. Will fail to genereta the EOF char
+        waitpid(pid, NULL, 0);
+        exit(0);
+    }
+    //child proc
+    close(fd[1]);
+    dup2(fd[0], STDIN_FILENO);
+    close(fd[0]);
+    execl(DEF_PAGER, "more", (char *) 0);
+    return 0;
+}
+```
+Without the close(fd[1]) on the parent proc, the stream does not receive a EOF char, thus the reading child pagination program ```more``` waiting forever after the reading all the contents of the pipe.
+
+# 15.2 In the program in Figure 15.6, remove the waitpid at the end of the parent code. Explain what happens.
+Refer the same program as above.
+Here when we comment the waitpid, i.e, we do not wait on the child program, it closes both read and write ends of the pipe. Noe considering the child following parents write, there is good chage that of the writes from the parennt are lost to the ```more``` or pagination program.
