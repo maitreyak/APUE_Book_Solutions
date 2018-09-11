@@ -44,3 +44,11 @@ Without the close(fd[1]) on the parent proc, the stream does not receive a EOF c
 # 15.2 In the program in Figure 15.6, remove the waitpid at the end of the parent code. Explain what happens.
 Refer the same program as above.
 Here when we comment the waitpid, i.e, we do not wait on the child program, it closes both read and write ends of the pipe. Noe considering the child following parents write, there is good chage that of the writes from the parennt are lost to the ```more``` or pagination program.
+
+# 15.3 What happens if the argument to popen is a nonexistent command? Write a small program to test this.
+The popen return will return a NULL file pointer for a nonexistent command. However, the exec returns a  nonexistent command error. This is one of of those really really boring excercies problems.
+
+# 15.4 In the program shown in Figure 15.18, remove the signal handler, execute the program, and then terminate the child. After entering a line of input, how can you tell that the parent was terminated by SIGPIPE?
+
+# 15.5 In the program in Figure 15.18, use the standard I/O library for reading and writing the pipes instead of read and write.
+
