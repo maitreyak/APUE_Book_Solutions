@@ -82,7 +82,7 @@ vagrant@precise64:/vagrant/advC$ ./a.out 5 10 5<>output_file
 vagrant@precise64:/vagrant/advC$ cat output_file
 SUCCESS
 ```
-During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/{pid}/fd directory. Or just use the lsod -p <pid> command to see all open files (& file descrioptors).
+During the execution of the program you can check the all open file descriptors by the pid by looking in /proc/{pid}/fd directory. Or just use the lsof -p <pid> command to see all open files (& file descrioptors).
 
 # 3.3
 # Assume that a process executes the following three function calls. Draw the resulting picture, similar to Figure 3.8. Which descriptors are affected by an fcntl on fd1 with a command of F_SETFD? Which descriptors are affected by an fcntl on fd1 with a command of F_SETFL?
